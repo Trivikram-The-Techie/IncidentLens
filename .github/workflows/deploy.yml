@@ -1,0 +1,80 @@
+name: IncidentLens CI/CD - Build, Test & Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID || 'incidentlens-prod-gcp' }}
+  REGION: ${{ secrets.GCP_REGION || 'us-central1' }}
+  SERVICE_NAME: incidentlens-copilot
+  IMAGE_NAME: gcr.io/${{ secrets.GCP_PROJECT_ID || 'incidentlens-prod-gcp' }}/incidentlens-copilot
+
+jobs:
+  test:
+    name: Run Automated SRE Diagnosis Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run 30-Second Diagnosis & Rollback Test
+        run: npm test
+
+  deploy:
+    name: Build & Deploy to Google Cloud Run
+    needs: test
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        if: env.GCP_SA_KEY != ''
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        if: env.GCP_SA_KEY != ''
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Google Container Registry
+        if: env.GCP_SA_KEY != ''
+        run: gcloud auth configure-docker --quiet
+
+      - name: Build and Push Container Image
+        if: env.GCP_SA_KEY != ''
+        run: |
+          docker build -t ${{ env.IMAGE_NAME }}:${{ github.sha }} -t ${{ env.IMAGE_NAME }}:latest .
+          docker push ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          docker push ${{ env.IMAGE_NAME }}:latest
+
+      - name: Deploy to Cloud Run
+        if: env.GCP_SA_KEY != ''
+        run: |
+          gcloud run deploy ${{ env.SERVICE_NAME }} \
+            --image ${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            --platform managed \
+            --region ${{ env.REGION }} \
+            --allow-unauthenticated \
+            --set-env-vars NODE_ENV=production \
+            --set-env-vars GEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}" \
+            --set-env-vars SLACK_WEBHOOK_URL="${{ secrets.SLACK_WEBHOOK_URL }}"
