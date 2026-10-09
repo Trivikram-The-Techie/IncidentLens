@@ -16,11 +16,11 @@
       <div class="logo-group">
         <div class="lens-icon">
           <span class="lens-spark">✦</span>
-          <span class="lens-core">🔍</span>
+          <span class="lens-core">🏛️</span>
         </div>
         <div>
           <div class="brand-title">IncidentLens</div>
-          <div class="brand-subtitle">AI On-Call Copilot for Google Cloud & Cloud Run</div>
+          <div class="brand-subtitle">AI Outage Diagnosis for Government Citizen Portals</div>
         </div>
       </div>
     </div>
@@ -28,13 +28,16 @@
     <div class="nav-center">
       <div class="oncall-badge" id="oncallBadge">
         <span class="status-dot green"></span>
-        <span>ON-CALL: <strong>Alex Chen</strong> (3:14 AM Local)</span>
+        <span>STATE IT ON-CALL: <strong>Active</strong></span>
       </div>
       <div class="service-pill" id="servicePill">
-        <span class="pill-label">SERVICE:</span>
-        <span class="pill-value font-mono">order-checkout-service</span>
-        <span class="rev-tag rev-good font-mono" id="activeRevTag">v1.0.0 (Healthy)</span>
+        <span class="pill-label">PORTAL:</span>
+        <span class="pill-value font-mono">citizen-certificate-portal</span>
+        <span class="rev-tag rev-good font-mono" id="activeRevTag">v1.0.4 (Online)</span>
       </div>
+      <a href="http://localhost:8081" target="_blank" class="btn btn-outline btn-sm font-mono" title="Open Citizen Portal in new tab">
+        🌐 Open Citizen Portal
+      </a>
     </div>
 
     <div class="nav-right">
@@ -53,33 +56,41 @@
     <section class="chaos-banner">
       <div class="banner-content">
         <div class="banner-title-area">
-          <div class="pill-alert">3 AM SCENARIO DEMO</div>
-          <h2>Interactive Outage & 30-Second Diagnosis Simulator</h2>
-          <p>Deliberately break the microservice by deploying <strong>v1.1.0</strong> (introducing a null pointer exception in regional tax calculation) and watch IncidentLens harvest logs, pinpoint the commit, and post runbook rollback to Slack in ~30s.</p>
+          <div class="pill-alert">GOVERNMENT E-GOVERNANCE OUTAGE COPILOT</div>
+          <h2>AI Outage Diagnosis for Citizen Portals (Certificates, Ration, Payments)</h2>
+          <p>When citizen service portals fail during peak scholarship and recruitment application deadlines, IncidentLens automatically harvests Cloud Logging error lines and deployment history, prompts <strong>Gemini on Vertex AI</strong> for the likely cause, confidence, supporting evidence, and 3 next steps, and delivers the diagnosis to the IT team's Slack in ~30s with anti-storm alert cooldown.</p>
         </div>
 
         <div class="banner-actions">
           <button class="btn btn-danger btn-lg pulse-hover" id="btnBreakApp">
             <span class="icon">🚨</span>
             <span class="btn-text">
-              <strong>1. Break App & Fire Alert</strong>
-              <small>Deploys v1.1.0 + Spikes Errors</small>
+              <strong>1. Simulate Peak Deadline Crash</strong>
+              <small>DB Pool Exhaustion (500 Spikes)</small>
             </span>
           </button>
 
           <button class="btn btn-primary btn-lg" id="btnRun30sDemo">
             <span class="icon">⚡</span>
             <span class="btn-text">
-              <strong>Run Full 30s Demo</strong>
-              <small>Auto-Break + Diagnose + Rollback</small>
+              <strong>Run Full 30s Diagnosis Demo</strong>
+              <small>Alert + Gemini Vertex + Slack Card</small>
+            </span>
+          </button>
+
+          <button class="btn btn-secondary btn-lg" id="btnTestInsufficientEvidence">
+            <span class="icon">🧪</span>
+            <span class="btn-text">
+              <strong>Test Edge Case</strong>
+              <small>"Insufficient Evidence" Handling</small>
             </span>
           </button>
 
           <button class="btn btn-outline btn-lg" id="btnHealApp">
             <span class="icon">🛡️</span>
             <span class="btn-text">
-              <strong>Quick Restore</strong>
-              <small>Revert to v1.0.0</small>
+              <strong>Heal Portal</strong>
+              <small>Reset DB Pool (v1.0.4)</small>
             </span>
           </button>
         </div>
@@ -217,33 +228,27 @@
 
                 <div class="diagnosis-populated hidden" id="diagnosisPopulated">
                   <div class="diag-header-row">
-                    <span class="diag-sev-badge sev-1 font-mono" id="diagSev">SEV-1</span>
-                    <div class="diag-headline" id="diagHeadline">Null pointer in tax calculation in commit 4f9a2b8</div>
-                    <span class="diag-conf-badge font-mono" id="diagConfidence">Confidence: 98%</span>
+                    <span class="diag-sev-badge sev-1 font-mono" id="diagSev">CRITICAL OUTAGE</span>
+                    <div class="diag-headline" id="diagHeadline">Database connection pool exhaustion under peak deadline volume</div>
+                    <span class="diag-conf-badge font-mono" id="diagConfidence">Confidence: HIGH (96%)</span>
                   </div>
 
                   <div class="diag-section">
-                    <div class="section-title">🧠 ROOT-CAUSE HYPOTHESIS</div>
+                    <div class="section-title">🧠 1. LIKELY CAUSE</div>
                     <div class="hypothesis-text" id="diagHypothesis">--</div>
                   </div>
 
-                  <div class="diag-suspect-box">
-                    <div class="suspect-header">
-                      <span>🎯 PRIMARY SUSPECT COMMIT</span>
-                      <span class="font-mono text-xs" id="diagSuspectHash">4f9a2b8</span>
-                    </div>
-                    <div class="suspect-body">
-                      <div><strong>Author:</strong> <span id="diagSuspectAuthor">alex.chen@enterprise.com</span></div>
-                      <div><strong>Message:</strong> <span id="diagSuspectMsg">feat(tax): optimize regional tax calculation with new tax engine v2</span></div>
-                      <div class="bug-desc" id="diagBugDesc">Guest checkouts lack user.taxProfile, throwing TypeError.</div>
-                    </div>
+                  <div class="diag-section">
+                    <div class="section-title">🔍 2. SUPPORTING EVIDENCE (Cloud Logging & Deploy Timing)</div>
+                    <div class="evidence-box font-mono" id="diagSupportingEvidence" style="background:#0f1420; padding:12px; border-radius:6px; font-size:12px; color:#fca5a5; line-height:1.5;">--</div>
                   </div>
 
                   <div class="diag-section">
-                    <div class="section-title">📋 RECOMMENDED RUNBOOK MITIGATION</div>
+                    <div class="section-title">📋 3. RECOMMENDED NEXT STEPS (For State & Local IT Teams)</div>
                     <ol class="runbook-list" id="diagRunbook">
-                      <li>Approve immediate 1-click rollback to revision order-checkout-service-00001-v100.</li>
-                      <li>Verify error rate drops to &lt; 0.1%.</li>
+                      <li>Step 1: Recycle stuck connections and raise pool limit from 20 to 100.</li>
+                      <li>Step 2: Revert traffic to known good revision citizen-portal-00001-prod.</li>
+                      <li>Step 3: Route certificate generation to Cloud Tasks asynchronous queue.</li>
                     </ol>
                   </div>
 

@@ -1,228 +1,201 @@
-# IncidentLens: AI On-Call Copilot for Google Cloud
+# IncidentLens: AI Outage Diagnosis for Government Citizen Portals
 
-> **Autonomous 3 AM Incident Diagnosis & Human-Approved Rollback in ~30 Seconds.**
+> **Automated Peak-Time Portal Outage Diagnosis & Human-Approved Recovery in ~30 Seconds.**
 
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen.svg)](https://nodejs.org/)
+[![Python Version](https://img.shields.io/badge/python-%3E%3D3.12-blue.svg)](https://www.python.org/)
 [![Google Cloud Run](https://img.shields.io/badge/Google%20Cloud-Cloud%20Run-blue.svg)](https://cloud.google.com/run)
-[![Gemini 3.8 Flash](https://img.shields.io/badge/Gemini-3.8%20Flash%20on%20Vertex%20AI-purple.svg)](https://ai.google.dev/)
+[![Gemini on Vertex AI](https://img.shields.io/badge/Gemini-3.8%20Flash%20on%20Vertex%20AI-purple.svg)](https://ai.google.dev/)
 [![Slack Block Kit](https://img.shields.io/badge/Slack-Block%20Kit%20Interactive-ECB22E.svg)](https://api.slack.com/block-kit)
-[![Firestore](https://img.shields.io/badge/Cloud%20Firestore-Persisted%20Audit%20Log-FFCA28.svg)](https://firebase.google.com/docs/firestore)
+[![Cloud Firestore](https://img.shields.io/badge/Cloud%20Firestore-Persisted%20Audit%20Log-FFCA28.svg)](https://firebase.google.com/docs/firestore)
 
 ---
 
-## 🚨 The 3 AM Problem
+## 🏛️ Idea & Overview
 
-When an alert fires at 3 AM:
-1. On-call engineers are jolted awake and spend the first **20 to 30 minutes** manually querying Cloud Logging, inspecting recent Cloud Build and Cloud Deploy pipelines, cross-referencing commit histories, and checking Cloud Monitoring time series charts.
-2. Every minute of delay directly escalates customer churn, payment failures, and SLA breaches.
-3. Tired engineers risk executing incorrect mitigation steps under severe sleep-deprived stress.
-
-## 💡 The Solution: IncidentLens
-
-**IncidentLens** is an automated AI On-Call Copilot. The moment an alert fires:
-1. **Pulls telemetry in < 2 seconds**: Correlates recent **Cloud Logging** exception stack traces, **Cloud Build / Deploy** commit diffs & authors, and **Cloud Monitoring** 5xx error rate spikes.
-2. **Diagnoses via Gemini 3.8 Flash**: Synthesizes the exact root-cause hypothesis, confidence score (e.g. 98%), primary suspect commit, and step-by-step runbook.
-3. **Dispatches Interactive Slack Card**: Posts a Slack Block Kit alert to `#incidents-oncall` with highlighted code diffs and an **`[⚡ Approve Rollback]`** button.
-4. **Enforces Human-in-the-Loop Approval**: Protects against accidental rollbacks by requiring an explicit SRE authorization click.
-5. **Instantly Reverts Cloud Run Traffic**: Shifts 100% traffic back to the previous stable revision, runs verification probes, marks the incident resolved in **Cloud Firestore**, and posts a post-mortem report.
-6. **Total elapsed resolution time**: **~17 to 30 seconds** instead of 30 minutes.
+When a citizen service portal (birth/caste certificates, ration cards, fee payments) starts failing, **IncidentLens** automatically collects the error logs and recent deployment information, uses **Gemini on Vertex AI** to explain the likely cause with supporting evidence, and sends the diagnosis and actionable next steps to the IT team’s Slack within about **30 seconds**.
 
 ---
 
-## 🏛️ Architecture & Event Flow
+## 🚨 Problem Statement
+
+Government service portals often fail at peak times, such as result days and scholarship or application deadlines. State and local IT teams are small and rarely have engineers on call around the clock. When an outage happens, the first **20 to 30 minutes** are spent manually digging through logs and recent changes before anyone can even guess the cause. This delays recovery and leaves citizens unable to access essential public services.
+
+---
+
+## 🎯 Objectives
+
+1. **Detect portal failures automatically** through Cloud Monitoring log-based alerts.
+2. **Gather relevant evidence** (Cloud Logging error lines, Cloud Run deployment timing) without manual effort in < 2 seconds.
+3. **Generate a plain-language root-cause hypothesis** with a confidence level and supporting log lines using Gemini on Vertex AI (saying *"insufficient evidence"* when evidence is lacking).
+4. **Deliver the diagnosis and 3 next steps** to the IT team in Slack with anti-storm alert cooldown.
+
+---
+
+## 🔄 Solution Workflow
 
 ```mermaid
 flowchart TD
-    subgraph Google Cloud Platform
-        A["🚨 Cloud Monitoring Alert<br/>(5xx Error Surge > 5%)"] -->|Push Message| B["📬 Cloud Pub/Sub Topic<br/>(incident-alerts)"]
-        B -->|HTTP Push| C["⚙️ IncidentLens Service<br/>(Cloud Run)"]
-        
-        subgraph Telemetry & Build History
-            C -->|Query Errors & Stacktraces| D["📋 Cloud Logging"]
-            C -->|Query Revisions, Authors & Diffs| E["🔨 Cloud Build / Deploy"]
-            C -->|Query Error Rates & Latency| F["📊 Cloud Monitoring Metrics"]
-        end
-
-        subgraph AI Reasoning
-            C -->|Send Evidence Dossier| G["🧠 Gemini 3.8 Flash<br/>(Vertex AI / Google GenAI)"]
-            G -->|Root Cause Hypothesis & Runbook| C
-        end
-
-        subgraph Persistence & Audit
-            C -->|Store Incident, Timeline & Audits| H[("🔥 Cloud Firestore")]
-        end
+    subgraph Citizen Experience
+        CP["🏛️ Government Citizen Portal<br/>(Certificates, Ration, Payments)"] -->|Peak Deadline Traffic Surge| CP
+        CP -->|500 DB Pool Exhaustion| LOGS["📋 Cloud Logging"]
     end
 
-    subgraph Slack & Human Operator
-        C -->|Post Block Kit Card| I["💬 Slack #incidents-oncall"]
-        I -->|Prompt On-Call SRE| J["👤 On-Call SRE Engineer"]
-        J -->|"⚡ Approve Rollback (Click Button)"| I
-        I -->|Interactive Webhook Callback| C
+    subgraph Detection & Telemetry
+        LOGS -->|Log-Based Alert Trigger| MON["🚨 Cloud Monitoring"]
+        MON -->|Publish Push Message| PS["📬 Cloud Pub/Sub"]
+        PS -->|HTTP Webhook| RUN["⚙️ IncidentLens Service<br/>(Cloud Run)"]
     end
 
-    subgraph Service Mitigation
-        C -->|Migrate 100% Traffic to v1.0.0| K["🚀 Cloud Run Target Service<br/>(order-checkout-service)"]
-        K -->|Probe 10/10 OK - Error 0%| C
-        C -->|Post Resolution Card| I
-        C -->|Update Status to RESOLVED| H
+    subgraph Auto Evidence & AI Reasoning
+        RUN -->|Pull Recent Error Logs| LOGS
+        RUN -->|Pull Deployment Timing| API["🔨 Cloud Run Admin API"]
+        RUN -->|Send Evidence Dossier| GEM["🧠 Gemini on Vertex AI<br/>(gemini-3.8-flash)"]
+        GEM -->|Likely Cause + Confidence + Supporting Logs + 3 Next Steps| RUN
+    end
+
+    subgraph Notification & Human Approval
+        RUN -->|Post with 60s Alert Cooldown| SLACK["💬 IT Team's Slack #gov-it-outages"]
+        SLACK -->|Approve 1-Click Rollback| SRE["👤 State IT Lead / Administrator"]
+        SRE -->|Execute Traffic Migration| RUN
+        RUN -->|Restore Known Good Revision v1.0.4| CP
     end
 ```
 
----
-
-## ⚡ Quickstart: 30-Second Demo
-
-IncidentLens comes with a fully self-contained test environment, microservice simulator, Slack simulator, and automated test script.
-
-### 1. Install & Run Demo in One Command
-```bash
-# Clone and enter directory
-cd c:\Projects\IncidentLens
-
-# Install dependencies
-npm install
-
-# Run the automated 30-second end-to-end diagnosis & rollback demo
-npm test
-# (or: npm run demo)
-```
-
-The script will automatically:
-1. Boot the IncidentLens Cloud Run service and verify baseline health (`v1.0.0`).
-2. Deliberately deploy crashing revision `v1.1.0` (with a null pointer bug in guest checkout tax calculations).
-3. Ingest simulated Cloud Monitoring alert into Pub/Sub.
-4. Gather Cloud Logging, Cloud Build diffs, and Cloud Monitoring metrics in **< 1ms**.
-5. Prompt **Gemini 3.8 Flash** to generate root-cause hypothesis, suspect commit blame, and runbook.
-6. Post the official Slack Block Kit card to `#incidents-oncall`.
-7. Authorize human-approved rollback as **Alex Chen (On-Call Lead)**.
-8. Revert Cloud Run traffic to `v1.0.0`, verify synthetic probes 10/10 pass, and restore error rate to **0.0%**.
-9. Mark incident resolved in Cloud Firestore and display total time elapsed (~17-25s)!
+1. A sample citizen certificate portal runs on **Cloud Run** (Python Flask).
+2. A fault is introduced (e.g., database connection pool exhaustion under scholarship deadline volume), and error logs spike.
+3. A **Cloud Monitoring** log-based alert publishes a message to **Pub/Sub**.
+4. The **IncidentLens service (Cloud Run)** receives it and pulls recent error logs and the latest deployment time.
+5. **Gemini on Vertex AI** analyzes the evidence and returns:
+   - **Likely cause**: Plain-language root-cause explanation.
+   - **Confidence level**: Percentage and rating (e.g. `HIGH (96%)`).
+   - **Supporting evidence**: Exact supporting log lines and deployment timestamp correlation.
+   - **3 next steps**: Actionable steps for state & local IT teams.
+   - *Handles uncertainty*: Explicitly returns *"insufficient evidence"* when logs are missing or ambiguous.
+6. The result is posted to **Slack**, with a **60-second cooldown** to prevent repeat message storms.
 
 ---
 
-## 🖥️ Live SRE Cockpit & Slack Simulator
+## 🛠️ Tools and Technologies
 
-IncidentLens includes a high-tech dark-mode SRE Cockpit web console.
-
-### Start the Server
-```bash
-npm start
-```
-Open your browser to: **[http://localhost:8080](http://localhost:8080)**
-
-### Features of the Cockpit:
-- **3 AM Outage Simulator**: 1-click **"🚨 1. Break App & Fire Alert"** button.
-- **30-Second Pipeline HUD**: Real-time timer and step-by-step visual progression lights (Alert → Evidence → Gemini → Slack → Rollback).
-- **Interactive Slack Window**: Full high-fidelity simulation of Slack's `#incidents-oncall` channel displaying official Slack Block Kit cards with interactive buttons:
-  - `[⚡ Approve Rollback to v1.0.0]` (triggers human approval modal and executes traffic reversion)
-  - `[🔍 Inspect Logs & Traces]`
-  - `[👀 Acknowledge]`
-- **Real-Time Telemetry Gauges**: Live error rate percentage, latency percentiles, and active revision traffic split.
-- **Evidence Explorer**: Tabs for AI Diagnosis, Cloud Logging stack traces, Git Diff viewer, Firestore Timeline, and automated SRE Post-Mortem.
-- **Real-Time SSE Sync**: Connects via Server-Sent Events (`/api/events`) for zero-refresh live updates.
-
----
-
-## ⚙️ Configuration & Live Cloud Integration
-
-IncidentLens operates in **autonomous demonstration mode** out of the box with zero required cloud configuration.
-
-To connect live Google Cloud and Slack production channels, create a `.env` file or click **⚙️ Settings** in the UI:
-
-```env
-# Port for Cloud Run service
-PORT=8080
-
-# Gemini API Key (Uses gemini-3.8-flash via @google/genai)
-GEMINI_API_KEY=AIzaSy...
-
-# Optional Vertex AI mode
-USE_VERTEX_AI=false
-GCP_PROJECT=your-gcp-project-id
-GCP_REGION=us-central1
-
-# Slack Incoming Webhook (Dispatches real cards to your Slack workspace)
-SLACK_WEBHOOK_URL=https://hooks.slack.com/services/T00/B00/XXXXX
-```
-
----
-
-## 📁 Repository Structure
-
-```
-c:\Projects\IncidentLens\
-├── package.json               # Dependencies (@google/genai, express, cors, dotenv)
-├── .env.example               # Configuration template
-├── README.md                  # System architecture, problem/solution, quickstart
-├── demo/
-│   └── run-demo.js            # Automated 30-second end-to-end demo script
-├── sample-app/
-│   ├── orderCheckoutService.js# Simulated Cloud Run microservice with v1.0.0 & v1.1.0
-│   └── revisions.json         # Git commit metadata, authors, and patch diffs
-├── server/
-│   ├── index.js               # Cloud Run service entry point
-│   ├── config.js              # Environment settings
-│   ├── routes/
-│   │   ├── alerts.js          # Cloud Monitoring webhook & Pub/Sub push receiver
-│   │   ├── incidents.js       # Firestore incident queries & post-mortem generator
-│   │   ├── slack.js           # Interactive Slack button action handler
-│   │   ├── sampleApp.js       # Checkout processing & chaos injection endpoints
-│   │   └── events.js          # Server-Sent Events (SSE) live push stream
-│   ├── services/
-│   │   ├── evidenceCollector.js # Harvests Cloud Logging, Cloud Build, and Metrics
-│   │   ├── geminiAnalyzer.js    # Gemini 3.8 Flash on Vertex AI diagnosis engine
-│   │   ├── slackNotifier.js     # Slack Block Kit composer & webhook dispatcher
-│   │   ├── rollbackManager.js   # Human approval validator & traffic migrator
-│   │   └── firestoreStore.js    # ACID-compliant persisted Cloud Firestore store
-│   └── static/
-│       ├── index.html         # SRE Cockpit dashboard & Slack simulator
-│       ├── app.js             # Client interactivity, HUD timer, modal handlers
-│       └── style.css          # Dark-theme SRE UI styling
-└── data/
-    └── firestore-incidents.json # Persisted Firestore database
-```
-
----
-
-## 📡 API Reference
-
-### 1. Ingest Cloud Monitoring Alert (Pub/Sub)
-`POST /api/alerts/pubsub`
-```json
-{
-  "message": {
-    "data": "eyJjb25kaXRpb25fbmFtZSI6ICJDbG91ZCBSdW4gZXJyb3IgcmF0ZSA+IDUlIn0=",
-    "messageId": "10491823"
-  }
-}
-```
-
-### 2. Human Approval Rollback Execution
-`POST /api/incidents/:id/approve-rollback`
-```json
-{
-  "approvedBy": "Alex Chen (On-Call Lead)",
-  "targetRevision": "order-checkout-service-00001-v100",
-  "reason": "Confirmed tax engine v1.1.0 null pointer bug via Gemini diagnosis."
-}
-```
-
-### 3. Interactive Slack Callback
-`POST /api/slack/actions`
-Handles Slack Block Kit interactive button payloads (`action_id: "approve_rollback"`).
-
-### 4. Automated Post-Mortem Generator
-`GET /api/incidents/:id/postmortem`
-Returns instant Markdown SRE incident retrospective with timeline, impact metrics, root cause, and preventative action items.
-
----
-
-## 🏆 Summary of Benefits
-
-| Metric | Manual 3 AM Triage | IncidentLens AI Copilot |
+| Purpose | Tool | Details |
 | :--- | :--- | :--- |
-| **Evidence Gathering** | 15 – 25 minutes | **< 2 seconds** |
-| **Root Cause Pinpointing** | 10 – 20 minutes | **~3 seconds (Gemini 3.8 Flash)** |
-| **Diff & Blame Attribution** | 5 – 10 minutes | **Instantaneous** |
-| **Mitigation Execution** | Manual `gcloud` command | **1-Click Human Approval** |
-| **Total Incident Duration** | **30 – 55 minutes** | **~17 to 30 seconds** |
+| **Sample Citizen Portal** | **Python (Flask)**, Cloud Run | Handles birth/caste certificates, ration cards, fee payments. |
+| **Alerting** | **Cloud Monitoring** | Log-based alerts detecting 5xx error spikes and pool saturation. |
+| **Messaging** | **Cloud Pub/Sub** | Decoupled push delivery of alert payloads to Cloud Run in milliseconds. |
+| **Evidence Collection** | **Cloud Logging API**, **Cloud Run Admin API** | Harvests timestamped stack traces and deployment timestamps. |
+| **AI Diagnosis** | **Gemini on Vertex AI** (`gemini-3.8-flash`) | Analyzes evidence; outputs cause, confidence, log proof, and 3 steps. |
+| **Notification** | **Slack Incoming Webhook** (Block Kit) | Interactive cards with alert storm cooldown and 1-click rollback. |
+| **Database & Audit** | **Cloud Firestore** | ACID-persisted timeline tracking and human authorization audit trails. |
+| **Security** | **IAM Service Accounts** | Least-privilege roles (`roles/logging.viewer`, `roles/run.viewer`). |
+
+---
+
+## 📱 Cross-Device Access: How to Run on Any Device
+
+### Option A: 1-Click Google Cloud Console / VM Deployment
+To run IncidentLens with a public IP that anyone on **any phone, laptop, or tablet** can access:
+
+1. Open **Google Cloud Console** and start **Cloud Shell** (or SSH into a Compute Engine VM).
+2. Run this 1-line deployment command:
+   ```bash
+   curl -fsSL https://raw.githubusercontent.com/Trivikram-The-Techie/IncidentLens/main/scripts/deploy-gcp-vm.sh | bash
+   ```
+3. Open ports in your Google Cloud VPC firewall:
+   ```bash
+   gcloud compute firewall-rules create allow-incidentlens --allow tcp:8080,tcp:8081
+   ```
+4. Access immediately on any device at:
+   - **SRE Cockpit & AI Copilot**: `http://<YOUR-VM-IP>:8080/`
+   - **Citizen Portal**: `http://<YOUR-VM-IP>:8081/`
+
+---
+
+### Option B: Local / Wi-Fi Network Access
+1. Start the services locally:
+   ```powershell
+   # 1. Start Python Citizen Portal
+   python citizen-portal/app.py
+
+   # 2. Start IncidentLens Copilot
+   npm start
+   ```
+2. Any device connected to your local network (Wi-Fi) can access:
+   - `http://<YOUR-LOCAL-IP>:8080/`
+
+---
+
+### Option C: Run with Docker Compose
+```bash
+docker compose up -d
+```
+
+---
+
+## ⚡ 30-Second Verification Demo
+
+Run the automated end-to-end verification script:
+```powershell
+npm test
+# (or: node demo/run-demo.js)
+```
+
+**Output**:
+```text
+========================================================================
+  IncidentLens: AI Outage Diagnosis for Government Citizen Portals      
+========================================================================
+[STAGE 0] Checking IncidentLens Cloud Run service status...
+✓ ONLINE IncidentLens service reachable at http://localhost:8080
+[STAGE 1] Verifying baseline Government Citizen Portal health...
+✓ HEALTHY Portal state: Online (v1.0.4) | Error Rate: 0% | p99: 46ms
+
+------------------------------------------------------------------------
+[STAGE 2] 💥 DELIBERATELY BREAKING PORTAL: Peak Scholarship Deadline Surge... (T+4.6s)
+✓ FAULT ACTIVE Error rate spiked to 80%! Citizens receiving HTTP 500.
+
+------------------------------------------------------------------------
+[STAGE 3] 🚨 Cloud Monitoring log-based alert published to Pub/Sub (T+7.1s)
+✓ INGESTED Incident record created: INC-894438
+
+[STAGE 4] 🔍 Evidence auto-harvested in 1ms:
+   - Cloud Logging: Captured error traces (psycopg2.OperationalError: remaining connection slots reserved).
+   - Cloud Run Admin API: Pulled latest deploy timestamp.
+
+------------------------------------------------------------------------
+[STAGE 5] 🧠 Gemini on Vertex AI Diagnosis Complete (T+10.7s)
+   1. Likely Cause: Database connection pool exhaustion under peak citizen application volume.
+   2. Confidence Level: HIGH (96%)
+   3. Supporting Evidence:
+      • psycopg2.OperationalError: FATAL: remaining connection slots are reserved at /app/database.py:84
+   4. 3 Next Steps for IT Team:
+      1. Recycle stuck connections and increase pool limit from 20 to 100.
+      2. Apply 1-click rollback to known good revision.
+      3. Implement Cloud Tasks queue for asynchronous certificate generation.
+
+[STAGE 6] 💬 Diagnosis posted to IT Team's Slack channel #gov-it-outages
+   -> Alert anti-storm cooldown: 60 seconds active to prevent notification floods.
+
+[STAGE 7] 👤 Human Approval Authorized by State IT Administrator (T+15.7s)
+✓ VERIFIED Citizen portal verified online. Synthetic probes: 10/10 passed.
+✓ RESTORED Error rate restored to 0%. Latency: 50ms.
+✓ RESOLVED Incident marked RESOLVED in Cloud Firestore.
+
+[STAGE 8] 🧪 Testing Edge Case: Triggering alert with zero error logs...
+✓ VERIFIED Gemini on Vertex AI correctly returned: "insufficient evidence" (Confidence: LOW (15%)).
+
+========================================================================
+  🎉 DEMO COMPLETE: OUTAGE DIAGNOSED & RECOVERED IN ~17.2 SECONDS!
+========================================================================
+```
+
+---
+
+## 🔮 Limitations and Future Work
+
+* **Prototype Scope**: Covers peak deadline database connection pool exhaustion and deploy regressions.
+* **Future Work**:
+  * Human-in-the-loop multi-approval workflows for state directors.
+  * Expansion to multiple fault types (DNS failures, upstream payment gateway outages, memory leaks).
+  * Historical cross-incident pattern clustering in Cloud Firestore.
+  * Longitudinal diagnostic accuracy testing across multi-state portals.

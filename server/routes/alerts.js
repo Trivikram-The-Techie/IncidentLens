@@ -58,7 +58,7 @@ async function processIncidentAlert(alertPayload) {
   await firestoreStore.addTimelineEvent(
     incidentId,
     'DIAGNOSIS_COMPLETE',
-    `Gemini root cause hypothesis generated with ${diagnosis.confidenceScore}% confidence. Suspected commit: ${diagnosis.primarySuspect.commitHash}.`
+    `Gemini diagnosis generated with ${diagnosis.confidence || diagnosis.confidenceScore + '%' || 'HIGH'} confidence. Likely cause: ${diagnosis.likelyCause?.slice(0, 80) || 'Analyzed'}.`
   );
   broadcastEvent('diagnosis_complete', { incidentId, diagnosis });
 
@@ -71,7 +71,7 @@ async function processIncidentAlert(alertPayload) {
   const completedIncident = {
     ...initialIncident,
     status: 'DIAGNOSED',
-    severity: diagnosis.severity,
+    severity: diagnosis.severity || 'CRITICAL',
     evidence,
     diagnosis,
     slackMessageId: postedSlack.id,
@@ -117,12 +117,30 @@ alertsRouter.post('/pubsub', async (req, res) => {
 // 3. Demo / Cockpit Trigger Endpoint
 alertsRouter.post('/simulate', async (req, res) => {
   try {
-    const { scenario = 'bad_deploy_tax_bug' } = req.body;
+    const { scenario = 'citizen_portal_deadline_crash' } = req.body;
 
-    // First, ensure sample service is in the crashing state for this scenario
-    if (scenario === 'bad_deploy_tax_bug') {
+    let targetService = 'citizen-certificate-portal';
+    let conditionName = 'Cloud Run log-based alert: Database connection pool exhausted';
+    let policyName = 'Citizen Portal Peak Application Deadline Outage Policy';
+    let summary = 'Citizen Portal (certificates & ration cards) failing under peak deadline load: Database connection pool limit (20) reached.';
+
+    if (scenario === 'citizen_portal_deadline_crash') {
+      targetService = 'citizen-certificate-portal';
+      try {
+        await fetch('http://localhost:8081/api/chaos/inject-fault', { method: 'POST' });
+      } catch (e) {}
+    } else if (scenario === 'insufficient_evidence_test') {
+      // Edge case testing: triggers alert with zero error logs to test "insufficient evidence" handling
+      targetService = 'citizen-certificate-portal';
+      conditionName = 'Cloud Monitoring anomaly spike with zero matching application logs';
+      policyName = 'Zero-Log Transient Alert';
+      summary = 'Transient metric alert fired but no application error traces found.';
+    } else {
+      targetService = 'order-checkout-service';
+      conditionName = 'Cloud Run service error rate > 5% for 1m';
+      policyName = 'Production 5xx Error Spike Alert Policy';
+      summary = 'Cloud Run service order-checkout-service has an error rate of 88.5%, violating policy threshold (5.0%).';
       sampleOrderService.deployRevision('1.1.0');
-      // Trigger a few crashing requests to populate realistic log & metrics history
       for (let i = 0; i < 6; i++) {
         sampleOrderService.processCheckout({ isGuest: true, amount: 89.0 });
       }
@@ -130,18 +148,18 @@ alertsRouter.post('/simulate', async (req, res) => {
 
     const simulatedAlert = {
       incident_id: `${Math.floor(100000 + Math.random() * 900000)}`,
-      condition_name: 'Cloud Run service error rate > 5% for 1m',
-      policy_name: 'Production 5xx Error Spike Alert Policy',
+      condition_name: conditionName,
+      policy_name: policyName,
       resource: {
         type: 'cloud_run_revision',
         labels: {
-          service_name: 'order-checkout-service',
-          project_id: 'incidentlens-prod-gcp',
+          service_name: targetService,
+          project_id: 'incidentlens-gov-gcp',
           location: 'us-central1',
         },
       },
-      summary: 'Cloud Run service order-checkout-service has an error rate of 88.5%, violating policy threshold (5.0%).',
-      started_at: Math.floor(Date.now() / 1000) - 60,
+      summary,
+      started_at: Math.floor(Date.now() / 1000) - 45,
       state: 'open',
     };
 

@@ -92,9 +92,14 @@ function setupTabs() {
 
 // Setup Event Listeners
 function setupEventListeners() {
-  btnBreakApp.addEventListener('click', () => triggerIncident(false));
-  btnRun30sDemo.addEventListener('click', () => triggerIncident(true));
+  btnBreakApp.addEventListener('click', () => triggerIncident(false, 'citizen_portal_deadline_crash'));
+  btnRun30sDemo.addEventListener('click', () => triggerIncident(true, 'citizen_portal_deadline_crash'));
   btnHealApp.addEventListener('click', restoreHealthyService);
+
+  const btnTestInsufficient = document.getElementById('btnTestInsufficientEvidence');
+  if (btnTestInsufficient) {
+    btnTestInsufficient.addEventListener('click', () => triggerIncident(false, 'insufficient_evidence_test'));
+  }
 
   btnSettings.addEventListener('click', () => {
     loadSettings();
@@ -142,18 +147,18 @@ function setStepCompleted(stepElem, statusText = 'DONE') {
 }
 
 // Trigger Outage & Incident Analysis
-async function triggerIncident(autoRollback = false) {
+async function triggerIncident(autoRollback = false, scenario = 'citizen_portal_deadline_crash') {
   startTimerHUD();
   setStepActive(stepAlert, 'FIRING');
 
   // Add initial log
-  addClientLog('WARN', 'Cloud Monitoring metric run.googleapis.com/request_count exceeded threshold (5%)');
+  addClientLog('WARN', 'Cloud Monitoring log-based alert: Database connection pool threshold breached (20/20)');
 
   try {
     const res = await fetch('/api/alerts/simulate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ scenario: 'bad_deploy_tax_bug' }),
+      body: JSON.stringify({ scenario }),
     });
 
     const data = await res.json();
@@ -199,23 +204,34 @@ function applyIncidentData(incident) {
     diagnosisEmpty.classList.add('hidden');
     diagnosisPopulated.classList.remove('hidden');
 
-    diagSev.textContent = d.severity || 'SEV-1';
-    diagHeadline.textContent = d.incidentHeadline || incident.title;
-    diagConfidence.textContent = `Confidence: ${d.confidenceScore || 98}%`;
-    diagHypothesis.textContent = d.rootCauseHypothesis || 'Analyzing...';
+    const isInsufficient = d.likelyCause === 'insufficient evidence';
+    diagSev.textContent = isInsufficient ? 'AMBIGUOUS' : (d.severity || 'CRITICAL OUTAGE');
+    diagSev.className = `diag-sev-badge ${isInsufficient ? 'badge-yellow' : 'sev-1'} font-mono`;
 
-    if (d.primarySuspect) {
-      diagSuspectHash.textContent = d.primarySuspect.commitHash || '4f9a2b8';
-      diagSuspectAuthor.textContent = d.primarySuspect.author || 'alex.chen@enterprise.com';
-      diagSuspectMsg.textContent = d.primarySuspect.message || 'Tax engine update';
-      diagBugDesc.textContent = d.primarySuspect.bugExplanation || '';
+    diagHeadline.textContent = isInsufficient 
+      ? 'Insufficient Evidence to Conclude Root Cause'
+      : (d.incidentHeadline || d.likelyCause?.slice(0, 80) + '...' || incident.title);
+
+    diagConfidence.textContent = `Confidence: ${d.confidence || (d.confidenceScore ? d.confidenceScore + '%' : 'HIGH')}`;
+    diagHypothesis.textContent = d.likelyCause || d.rootCauseHypothesis || 'Analyzing...';
+
+    // Supporting Evidence
+    const supportingElem = document.getElementById('diagSupportingEvidence');
+    if (supportingElem) {
+      if (d.supportingEvidence && d.supportingEvidence.length > 0) {
+        supportingElem.innerHTML = d.supportingEvidence.map(ev => `<div>• ${escapeHtml(ev)}</div>`).join('');
+      } else {
+        supportingElem.textContent = 'No matching error log signatures captured in current window.';
+      }
     }
 
-    if (d.runbookSteps) {
-      diagRunbook.innerHTML = d.runbookSteps.map((s) => `<li>${s}</li>`).join('');
+    // 3 Next Steps
+    const steps = d.nextSteps || d.runbookSteps || [];
+    if (steps.length > 0) {
+      diagRunbook.innerHTML = steps.map((s) => `<li>${s}</li>`).join('');
     }
 
-    diagAiModel.textContent = d.aiModel || 'Gemini 3.8 Flash';
+    diagAiModel.textContent = d.aiModel || 'Gemini on Vertex AI (gemini-3.8-flash)';
     diagTime.textContent = new Date(d.analyzedAt || Date.now()).toLocaleTimeString();
   }
 

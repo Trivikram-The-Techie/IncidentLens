@@ -12,7 +12,22 @@ export class EvidenceCollector {
     console.log(`[EvidenceCollector] Gathering evidence for ${serviceName} (window: ${timeWindowMinutes}m)...`);
 
     // 1. Pull from Cloud Logging
-    const rawLogs = sampleOrderService.getRecentLogs(50);
+    let rawLogs = [];
+    if (serviceName === 'citizen-certificate-portal') {
+      try {
+        const res = await fetch('http://localhost:8081/api/logs?limit=50');
+        if (res.ok) {
+          const data = await res.json();
+          rawLogs = data.logs || [];
+        }
+      } catch (e) {
+        // Fallback to sampleOrderService logs or simulated citizen logs
+        rawLogs = sampleOrderService.getRecentLogs(50);
+      }
+    } else {
+      rawLogs = sampleOrderService.getRecentLogs(50);
+    }
+
     const errorLogs = rawLogs.filter((l) => l.severity === 'ERROR' || l.severity === 'CRITICAL');
     
     // Extract unique error signatures & stack traces

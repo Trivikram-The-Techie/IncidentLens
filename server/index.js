@@ -31,11 +31,14 @@ app.get('/health', (req, res) => {
   });
 });
 
+import { citizenPortalRouter } from './routes/citizenPortal.js';
+
 // Mount modular API routers
 app.use('/api/alerts', alertsRouter);
 app.use('/api/incidents', incidentsRouter);
 app.use('/api/slack', slackRouter);
 app.use('/api/sample-app', sampleAppRouter);
+app.use('/api/citizen-portal', citizenPortalRouter);
 app.use('/api/events', eventsRouter);
 
 // Settings endpoint
