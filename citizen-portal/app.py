@@ -276,5 +276,5 @@ def heal():
     })
 
 if __name__ == "__main__":
-    print(f"🚀 Government Citizen Portal listening on http://0.0.0.0:{PORT}")
+    print(f"[CitizenPortal] Government Citizen Portal listening on http://0.0.0.0:{PORT}")
     app.run(host="0.0.0.0", port=PORT, debug=False)
