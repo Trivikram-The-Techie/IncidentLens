@@ -2895,9 +2895,2532 @@
         "aiModel": "Gemini on Vertex AI (gemini-3.8-flash)",
         "analyzedAt": "2026-10-10T05:42:38.721Z"
       }
+    },
+    {
+      "id": "INC-533205",
+      "service": "citizen-certificate-portal",
+      "title": "Elevated 5xx Errors on citizen-certificate-portal",
+      "severity": "CRITICAL",
+      "status": "DIAGNOSED",
+      "alertPayload": {
+        "incident_id": "533205",
+        "condition_name": "Cloud Run log-based alert: Database connection pool exhausted",
+        "policy_name": "Citizen Portal Peak Application Deadline Outage Policy",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "service_name": "citizen-certificate-portal",
+            "project_id": "incidentlens-gov-gcp",
+            "location": "us-central1"
+          }
+        },
+        "summary": "Citizen Portal (certificates & ration cards) failing under peak deadline load: Database connection pool limit (20) reached.",
+        "started_at": 1791611130,
+        "state": "open"
+      },
+      "createdAt": "2026-10-10T05:46:15.353Z",
+      "timeline": [
+        {
+          "timestamp": "2026-10-10T05:46:15.353Z",
+          "type": "ALERT_INGESTED",
+          "description": "Alert ingested from Cloud Monitoring Pub/Sub: Cloud Run log-based alert: Database connection pool exhausted"
+        },
+        {
+          "timestamp": "2026-10-10T05:46:15.363Z",
+          "type": "EVIDENCE_GATHERED",
+          "description": "Harvested 1 error logs, recent deploy order-checkout-service-00001-v100, and telemetry metrics.",
+          "metadata": {}
+        },
+        {
+          "timestamp": "2026-10-10T05:46:15.367Z",
+          "type": "DIAGNOSIS_COMPLETE",
+          "description": "Gemini diagnosis generated with HIGH (96%) confidence. Likely cause: Cloud Run service citizen-certificate-portal experienced an unhandled 5xx error .",
+          "metadata": {}
+        }
+      ],
+      "updatedAt": "2026-10-10T05:46:15.374Z",
+      "evidence": {
+        "serviceName": "citizen-certificate-portal",
+        "gatheredAt": "2026-10-10T05:46:15.362Z",
+        "collectionDurationMs": 6,
+        "cloudLogging": {
+          "totalLogsEvaluated": 2,
+          "errorCount": 1,
+          "uniqueErrorSignatures": [
+            {
+              "signature": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "count": 1,
+              "sampleTimestamp": "2026-10-10T05:46:15.346996+00:00",
+              "stackTrace": null,
+              "httpStatus": 500
+            }
+          ],
+          "recentErrorSamples": [
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:46:15.346996+00:00"
+            }
+          ]
+        },
+        "cloudDeploy": {
+          "activeRevisionId": "order-checkout-service-00001-v100",
+          "activeVersion": "1.0.0",
+          "activeImage": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+          "deployedAt": "2026-10-10T09:15:00.000Z",
+          "minutesSinceDeploy": 1,
+          "author": "sarah.connor@enterprise.com",
+          "commit": {
+            "hash": "8a21f4c",
+            "branch": "main",
+            "message": "fix: update stripe checkout session timeout handling",
+            "diff": "--- a/src/checkout.js\n+++ b/src/checkout.js\n@@ -34,3 +34,4 @@\n-  const timeout = 5000;\n+  const timeout = 8000;\n+  session.setTimeout(timeout);"
+          },
+          "previousStableRevision": {
+            "id": "order-checkout-service-00001-v100",
+            "version": "1.0.0",
+            "image": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+            "deployedAt": "2026-10-10T09:15:00.000Z",
+            "author": "sarah.connor@enterprise.com"
+          }
+        },
+        "cloudMonitoring": {
+          "errorRatePercent": 0,
+          "p50LatencyMs": 35,
+          "p95LatencyMs": 65,
+          "p99LatencyMs": 95,
+          "totalRequestsInWindow": 0,
+          "metricThresholdCondition": "run.googleapis.com/request_count with response_code_class >= 500 > 5%"
+        },
+        "correlation": {
+          "temporalMatch": true,
+          "summary": "Error spike (0%) appeared immediately following deployment of revision order-checkout-service-00001-v100 (commit 8a21f4c) by sarah.connor@enterprise.com."
+        }
+      },
+      "diagnosis": {
+        "likelyCause": "Cloud Run service citizen-certificate-portal experienced an unhandled 5xx error surge (0%) following deployment order-checkout-service-00001-v100.",
+        "confidence": "HIGH (96%)",
+        "confidenceScore": 96,
+        "supportingEvidence": [
+          "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+          "Temporal correlation: Inflection point matches deployment timestamp 2026-10-10T09:15:00.000Z."
+        ],
+        "nextSteps": [
+          "Step 1: Inspect active container instances in Cloud Run console.",
+          "Step 2: Revert traffic to known good revision.",
+          "Step 3: Review application error logs in Cloud Logging."
+        ],
+        "rollbackPlan": {
+          "recommended": true,
+          "targetRevision": "order-checkout-service-00001-v100"
+        },
+        "aiModel": "Gemini on Vertex AI (gemini-3.8-flash)",
+        "analyzedAt": "2026-10-10T05:46:15.367Z"
+      },
+      "slackMessageId": "SLACK_MSG_1791611175374"
+    },
+    {
+      "id": "INC-201722",
+      "service": "citizen-certificate-portal",
+      "title": "Elevated 5xx Errors on citizen-certificate-portal",
+      "severity": "CRITICAL",
+      "status": "DIAGNOSED",
+      "alertPayload": {
+        "incident_id": "201722",
+        "condition_name": "Cloud Run log-based alert: Database connection pool exhausted",
+        "policy_name": "Citizen Portal Peak Application Deadline Outage Policy",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "service_name": "citizen-certificate-portal",
+            "project_id": "incidentlens-gov-gcp",
+            "location": "us-central1"
+          }
+        },
+        "summary": "Citizen Portal (certificates & ration cards) failing under peak deadline load: Database connection pool limit (20) reached.",
+        "started_at": 1791611133,
+        "state": "open"
+      },
+      "createdAt": "2026-10-10T05:46:18.187Z",
+      "timeline": [
+        {
+          "timestamp": "2026-10-10T05:46:18.187Z",
+          "type": "ALERT_INGESTED",
+          "description": "Alert ingested from Cloud Monitoring Pub/Sub: Cloud Run log-based alert: Database connection pool exhausted"
+        },
+        {
+          "timestamp": "2026-10-10T05:46:18.194Z",
+          "type": "EVIDENCE_GATHERED",
+          "description": "Harvested 2 error logs, recent deploy order-checkout-service-00001-v100, and telemetry metrics.",
+          "metadata": {}
+        },
+        {
+          "timestamp": "2026-10-10T05:46:18.207Z",
+          "type": "DIAGNOSIS_COMPLETE",
+          "description": "Gemini diagnosis generated with HIGH (96%) confidence. Likely cause: Cloud Run service citizen-certificate-portal experienced an unhandled 5xx error .",
+          "metadata": {}
+        }
+      ],
+      "updatedAt": "2026-10-10T05:46:18.228Z",
+      "evidence": {
+        "serviceName": "citizen-certificate-portal",
+        "gatheredAt": "2026-10-10T05:46:18.194Z",
+        "collectionDurationMs": 5,
+        "cloudLogging": {
+          "totalLogsEvaluated": 3,
+          "errorCount": 2,
+          "uniqueErrorSignatures": [
+            {
+              "signature": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "count": 2,
+              "sampleTimestamp": "2026-10-10T05:46:18.186414+00:00",
+              "stackTrace": null,
+              "httpStatus": 500
+            }
+          ],
+          "recentErrorSamples": [
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:46:18.186414+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:46:15.346996+00:00"
+            }
+          ]
+        },
+        "cloudDeploy": {
+          "activeRevisionId": "order-checkout-service-00001-v100",
+          "activeVersion": "1.0.0",
+          "activeImage": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+          "deployedAt": "2026-10-10T09:15:00.000Z",
+          "minutesSinceDeploy": 1,
+          "author": "sarah.connor@enterprise.com",
+          "commit": {
+            "hash": "8a21f4c",
+            "branch": "main",
+            "message": "fix: update stripe checkout session timeout handling",
+            "diff": "--- a/src/checkout.js\n+++ b/src/checkout.js\n@@ -34,3 +34,4 @@\n-  const timeout = 5000;\n+  const timeout = 8000;\n+  session.setTimeout(timeout);"
+          },
+          "previousStableRevision": {
+            "id": "order-checkout-service-00001-v100",
+            "version": "1.0.0",
+            "image": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+            "deployedAt": "2026-10-10T09:15:00.000Z",
+            "author": "sarah.connor@enterprise.com"
+          }
+        },
+        "cloudMonitoring": {
+          "errorRatePercent": 0,
+          "p50LatencyMs": 35,
+          "p95LatencyMs": 65,
+          "p99LatencyMs": 95,
+          "totalRequestsInWindow": 0,
+          "metricThresholdCondition": "run.googleapis.com/request_count with response_code_class >= 500 > 5%"
+        },
+        "correlation": {
+          "temporalMatch": true,
+          "summary": "Error spike (0%) appeared immediately following deployment of revision order-checkout-service-00001-v100 (commit 8a21f4c) by sarah.connor@enterprise.com."
+        }
+      },
+      "diagnosis": {
+        "likelyCause": "Cloud Run service citizen-certificate-portal experienced an unhandled 5xx error surge (0%) following deployment order-checkout-service-00001-v100.",
+        "confidence": "HIGH (96%)",
+        "confidenceScore": 96,
+        "supportingEvidence": [
+          "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+          "Temporal correlation: Inflection point matches deployment timestamp 2026-10-10T09:15:00.000Z."
+        ],
+        "nextSteps": [
+          "Step 1: Inspect active container instances in Cloud Run console.",
+          "Step 2: Revert traffic to known good revision.",
+          "Step 3: Review application error logs in Cloud Logging."
+        ],
+        "rollbackPlan": {
+          "recommended": true,
+          "targetRevision": "order-checkout-service-00001-v100"
+        },
+        "aiModel": "Gemini on Vertex AI (gemini-3.8-flash)",
+        "analyzedAt": "2026-10-10T05:46:18.207Z"
+      }
+    },
+    {
+      "id": "INC-666790",
+      "service": "citizen-certificate-portal",
+      "title": "Elevated 5xx Errors on citizen-certificate-portal",
+      "severity": "CRITICAL",
+      "status": "DIAGNOSED",
+      "alertPayload": {
+        "incident_id": "666790",
+        "condition_name": "Cloud Run log-based alert: Database connection pool exhausted",
+        "policy_name": "Citizen Portal Peak Application Deadline Outage Policy",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "service_name": "citizen-certificate-portal",
+            "project_id": "incidentlens-gov-gcp",
+            "location": "us-central1"
+          }
+        },
+        "summary": "Citizen Portal (certificates & ration cards) failing under peak deadline load: Database connection pool limit (20) reached.",
+        "started_at": 1791611134,
+        "state": "open"
+      },
+      "createdAt": "2026-10-10T05:46:19.535Z",
+      "timeline": [
+        {
+          "timestamp": "2026-10-10T05:46:19.535Z",
+          "type": "ALERT_INGESTED",
+          "description": "Alert ingested from Cloud Monitoring Pub/Sub: Cloud Run log-based alert: Database connection pool exhausted"
+        },
+        {
+          "timestamp": "2026-10-10T05:46:19.541Z",
+          "type": "EVIDENCE_GATHERED",
+          "description": "Harvested 3 error logs, recent deploy order-checkout-service-00001-v100, and telemetry metrics.",
+          "metadata": {}
+        },
+        {
+          "timestamp": "2026-10-10T05:46:19.560Z",
+          "type": "DIAGNOSIS_COMPLETE",
+          "description": "Gemini diagnosis generated with HIGH (96%) confidence. Likely cause: Cloud Run service citizen-certificate-portal experienced an unhandled 5xx error .",
+          "metadata": {}
+        }
+      ],
+      "updatedAt": "2026-10-10T05:46:19.586Z",
+      "evidence": {
+        "serviceName": "citizen-certificate-portal",
+        "gatheredAt": "2026-10-10T05:46:19.541Z",
+        "collectionDurationMs": 5,
+        "cloudLogging": {
+          "totalLogsEvaluated": 4,
+          "errorCount": 3,
+          "uniqueErrorSignatures": [
+            {
+              "signature": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "count": 3,
+              "sampleTimestamp": "2026-10-10T05:46:19.533910+00:00",
+              "stackTrace": null,
+              "httpStatus": 500
+            }
+          ],
+          "recentErrorSamples": [
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:46:19.533910+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:46:18.186414+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:46:15.346996+00:00"
+            }
+          ]
+        },
+        "cloudDeploy": {
+          "activeRevisionId": "order-checkout-service-00001-v100",
+          "activeVersion": "1.0.0",
+          "activeImage": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+          "deployedAt": "2026-10-10T09:15:00.000Z",
+          "minutesSinceDeploy": 1,
+          "author": "sarah.connor@enterprise.com",
+          "commit": {
+            "hash": "8a21f4c",
+            "branch": "main",
+            "message": "fix: update stripe checkout session timeout handling",
+            "diff": "--- a/src/checkout.js\n+++ b/src/checkout.js\n@@ -34,3 +34,4 @@\n-  const timeout = 5000;\n+  const timeout = 8000;\n+  session.setTimeout(timeout);"
+          },
+          "previousStableRevision": {
+            "id": "order-checkout-service-00001-v100",
+            "version": "1.0.0",
+            "image": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+            "deployedAt": "2026-10-10T09:15:00.000Z",
+            "author": "sarah.connor@enterprise.com"
+          }
+        },
+        "cloudMonitoring": {
+          "errorRatePercent": 0,
+          "p50LatencyMs": 35,
+          "p95LatencyMs": 65,
+          "p99LatencyMs": 95,
+          "totalRequestsInWindow": 0,
+          "metricThresholdCondition": "run.googleapis.com/request_count with response_code_class >= 500 > 5%"
+        },
+        "correlation": {
+          "temporalMatch": true,
+          "summary": "Error spike (0%) appeared immediately following deployment of revision order-checkout-service-00001-v100 (commit 8a21f4c) by sarah.connor@enterprise.com."
+        }
+      },
+      "diagnosis": {
+        "likelyCause": "Cloud Run service citizen-certificate-portal experienced an unhandled 5xx error surge (0%) following deployment order-checkout-service-00001-v100.",
+        "confidence": "HIGH (96%)",
+        "confidenceScore": 96,
+        "supportingEvidence": [
+          "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+          "Temporal correlation: Inflection point matches deployment timestamp 2026-10-10T09:15:00.000Z."
+        ],
+        "nextSteps": [
+          "Step 1: Inspect active container instances in Cloud Run console.",
+          "Step 2: Revert traffic to known good revision.",
+          "Step 3: Review application error logs in Cloud Logging."
+        ],
+        "rollbackPlan": {
+          "recommended": true,
+          "targetRevision": "order-checkout-service-00001-v100"
+        },
+        "aiModel": "Gemini on Vertex AI (gemini-3.8-flash)",
+        "analyzedAt": "2026-10-10T05:46:19.560Z"
+      }
+    },
+    {
+      "id": "INC-590345",
+      "service": "citizen-certificate-portal",
+      "title": "Elevated 5xx Errors on citizen-certificate-portal",
+      "severity": "CRITICAL",
+      "status": "DIAGNOSED",
+      "alertPayload": {
+        "incident_id": "590345",
+        "condition_name": "Cloud Run log-based alert: Database connection pool exhausted",
+        "policy_name": "Citizen Portal Peak Application Deadline Outage Policy",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "service_name": "citizen-certificate-portal",
+            "project_id": "incidentlens-gov-gcp",
+            "location": "us-central1"
+          }
+        },
+        "summary": "Citizen Portal (certificates & ration cards) failing under peak deadline load: Database connection pool limit (20) reached.",
+        "started_at": 1791611135,
+        "state": "open"
+      },
+      "createdAt": "2026-10-10T05:46:20.301Z",
+      "timeline": [
+        {
+          "timestamp": "2026-10-10T05:46:20.302Z",
+          "type": "ALERT_INGESTED",
+          "description": "Alert ingested from Cloud Monitoring Pub/Sub: Cloud Run log-based alert: Database connection pool exhausted"
+        },
+        {
+          "timestamp": "2026-10-10T05:46:20.313Z",
+          "type": "EVIDENCE_GATHERED",
+          "description": "Harvested 4 error logs, recent deploy order-checkout-service-00001-v100, and telemetry metrics.",
+          "metadata": {}
+        },
+        {
+          "timestamp": "2026-10-10T05:46:20.330Z",
+          "type": "DIAGNOSIS_COMPLETE",
+          "description": "Gemini diagnosis generated with HIGH (96%) confidence. Likely cause: Cloud Run service citizen-certificate-portal experienced an unhandled 5xx error .",
+          "metadata": {}
+        }
+      ],
+      "updatedAt": "2026-10-10T05:46:20.352Z",
+      "evidence": {
+        "serviceName": "citizen-certificate-portal",
+        "gatheredAt": "2026-10-10T05:46:20.313Z",
+        "collectionDurationMs": 6,
+        "cloudLogging": {
+          "totalLogsEvaluated": 5,
+          "errorCount": 4,
+          "uniqueErrorSignatures": [
+            {
+              "signature": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "count": 4,
+              "sampleTimestamp": "2026-10-10T05:46:20.299885+00:00",
+              "stackTrace": null,
+              "httpStatus": 500
+            }
+          ],
+          "recentErrorSamples": [
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:46:20.299885+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:46:19.533910+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:46:18.186414+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:46:15.346996+00:00"
+            }
+          ]
+        },
+        "cloudDeploy": {
+          "activeRevisionId": "order-checkout-service-00001-v100",
+          "activeVersion": "1.0.0",
+          "activeImage": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+          "deployedAt": "2026-10-10T09:15:00.000Z",
+          "minutesSinceDeploy": 1,
+          "author": "sarah.connor@enterprise.com",
+          "commit": {
+            "hash": "8a21f4c",
+            "branch": "main",
+            "message": "fix: update stripe checkout session timeout handling",
+            "diff": "--- a/src/checkout.js\n+++ b/src/checkout.js\n@@ -34,3 +34,4 @@\n-  const timeout = 5000;\n+  const timeout = 8000;\n+  session.setTimeout(timeout);"
+          },
+          "previousStableRevision": {
+            "id": "order-checkout-service-00001-v100",
+            "version": "1.0.0",
+            "image": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+            "deployedAt": "2026-10-10T09:15:00.000Z",
+            "author": "sarah.connor@enterprise.com"
+          }
+        },
+        "cloudMonitoring": {
+          "errorRatePercent": 0,
+          "p50LatencyMs": 35,
+          "p95LatencyMs": 65,
+          "p99LatencyMs": 95,
+          "totalRequestsInWindow": 0,
+          "metricThresholdCondition": "run.googleapis.com/request_count with response_code_class >= 500 > 5%"
+        },
+        "correlation": {
+          "temporalMatch": true,
+          "summary": "Error spike (0%) appeared immediately following deployment of revision order-checkout-service-00001-v100 (commit 8a21f4c) by sarah.connor@enterprise.com."
+        }
+      },
+      "diagnosis": {
+        "likelyCause": "Cloud Run service citizen-certificate-portal experienced an unhandled 5xx error surge (0%) following deployment order-checkout-service-00001-v100.",
+        "confidence": "HIGH (96%)",
+        "confidenceScore": 96,
+        "supportingEvidence": [
+          "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+          "Temporal correlation: Inflection point matches deployment timestamp 2026-10-10T09:15:00.000Z."
+        ],
+        "nextSteps": [
+          "Step 1: Inspect active container instances in Cloud Run console.",
+          "Step 2: Revert traffic to known good revision.",
+          "Step 3: Review application error logs in Cloud Logging."
+        ],
+        "rollbackPlan": {
+          "recommended": true,
+          "targetRevision": "order-checkout-service-00001-v100"
+        },
+        "aiModel": "Gemini on Vertex AI (gemini-3.8-flash)",
+        "analyzedAt": "2026-10-10T05:46:20.330Z"
+      }
+    },
+    {
+      "id": "INC-185783",
+      "service": "citizen-certificate-portal",
+      "title": "Elevated 5xx Errors on citizen-certificate-portal",
+      "severity": "CRITICAL",
+      "status": "DIAGNOSED",
+      "alertPayload": {
+        "incident_id": "185783",
+        "condition_name": "Cloud Run log-based alert: Database connection pool exhausted",
+        "policy_name": "Citizen Portal Peak Application Deadline Outage Policy",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "service_name": "citizen-certificate-portal",
+            "project_id": "incidentlens-gov-gcp",
+            "location": "us-central1"
+          }
+        },
+        "summary": "Citizen Portal (certificates & ration cards) failing under peak deadline load: Database connection pool limit (20) reached.",
+        "started_at": 1791611135,
+        "state": "open"
+      },
+      "createdAt": "2026-10-10T05:46:20.934Z",
+      "timeline": [
+        {
+          "timestamp": "2026-10-10T05:46:20.934Z",
+          "type": "ALERT_INGESTED",
+          "description": "Alert ingested from Cloud Monitoring Pub/Sub: Cloud Run log-based alert: Database connection pool exhausted"
+        },
+        {
+          "timestamp": "2026-10-10T05:46:20.942Z",
+          "type": "EVIDENCE_GATHERED",
+          "description": "Harvested 5 error logs, recent deploy order-checkout-service-00001-v100, and telemetry metrics.",
+          "metadata": {}
+        },
+        {
+          "timestamp": "2026-10-10T05:46:20.959Z",
+          "type": "DIAGNOSIS_COMPLETE",
+          "description": "Gemini diagnosis generated with HIGH (96%) confidence. Likely cause: Cloud Run service citizen-certificate-portal experienced an unhandled 5xx error .",
+          "metadata": {}
+        }
+      ],
+      "updatedAt": "2026-10-10T05:46:20.982Z",
+      "evidence": {
+        "serviceName": "citizen-certificate-portal",
+        "gatheredAt": "2026-10-10T05:46:20.941Z",
+        "collectionDurationMs": 5,
+        "cloudLogging": {
+          "totalLogsEvaluated": 6,
+          "errorCount": 5,
+          "uniqueErrorSignatures": [
+            {
+              "signature": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "count": 5,
+              "sampleTimestamp": "2026-10-10T05:46:20.932924+00:00",
+              "stackTrace": null,
+              "httpStatus": 500
+            }
+          ],
+          "recentErrorSamples": [
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:46:20.932924+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:46:20.299885+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:46:19.533910+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:46:18.186414+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:46:15.346996+00:00"
+            }
+          ]
+        },
+        "cloudDeploy": {
+          "activeRevisionId": "order-checkout-service-00001-v100",
+          "activeVersion": "1.0.0",
+          "activeImage": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+          "deployedAt": "2026-10-10T09:15:00.000Z",
+          "minutesSinceDeploy": 1,
+          "author": "sarah.connor@enterprise.com",
+          "commit": {
+            "hash": "8a21f4c",
+            "branch": "main",
+            "message": "fix: update stripe checkout session timeout handling",
+            "diff": "--- a/src/checkout.js\n+++ b/src/checkout.js\n@@ -34,3 +34,4 @@\n-  const timeout = 5000;\n+  const timeout = 8000;\n+  session.setTimeout(timeout);"
+          },
+          "previousStableRevision": {
+            "id": "order-checkout-service-00001-v100",
+            "version": "1.0.0",
+            "image": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+            "deployedAt": "2026-10-10T09:15:00.000Z",
+            "author": "sarah.connor@enterprise.com"
+          }
+        },
+        "cloudMonitoring": {
+          "errorRatePercent": 0,
+          "p50LatencyMs": 35,
+          "p95LatencyMs": 65,
+          "p99LatencyMs": 95,
+          "totalRequestsInWindow": 0,
+          "metricThresholdCondition": "run.googleapis.com/request_count with response_code_class >= 500 > 5%"
+        },
+        "correlation": {
+          "temporalMatch": true,
+          "summary": "Error spike (0%) appeared immediately following deployment of revision order-checkout-service-00001-v100 (commit 8a21f4c) by sarah.connor@enterprise.com."
+        }
+      },
+      "diagnosis": {
+        "likelyCause": "Cloud Run service citizen-certificate-portal experienced an unhandled 5xx error surge (0%) following deployment order-checkout-service-00001-v100.",
+        "confidence": "HIGH (96%)",
+        "confidenceScore": 96,
+        "supportingEvidence": [
+          "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+          "Temporal correlation: Inflection point matches deployment timestamp 2026-10-10T09:15:00.000Z."
+        ],
+        "nextSteps": [
+          "Step 1: Inspect active container instances in Cloud Run console.",
+          "Step 2: Revert traffic to known good revision.",
+          "Step 3: Review application error logs in Cloud Logging."
+        ],
+        "rollbackPlan": {
+          "recommended": true,
+          "targetRevision": "order-checkout-service-00001-v100"
+        },
+        "aiModel": "Gemini on Vertex AI (gemini-3.8-flash)",
+        "analyzedAt": "2026-10-10T05:46:20.959Z"
+      }
+    },
+    {
+      "id": "INC-833411",
+      "service": "citizen-certificate-portal",
+      "title": "Elevated 5xx Errors on citizen-certificate-portal",
+      "severity": "CRITICAL",
+      "status": "DIAGNOSED",
+      "alertPayload": {
+        "incident_id": "833411",
+        "condition_name": "Cloud Run log-based alert: Database connection pool exhausted",
+        "policy_name": "Citizen Portal Peak Application Deadline Outage Policy",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "service_name": "citizen-certificate-portal",
+            "project_id": "incidentlens-gov-gcp",
+            "location": "us-central1"
+          }
+        },
+        "summary": "Citizen Portal (certificates & ration cards) failing under peak deadline load: Database connection pool limit (20) reached.",
+        "started_at": 1791611176,
+        "state": "open"
+      },
+      "createdAt": "2026-10-10T05:47:01.100Z",
+      "timeline": [
+        {
+          "timestamp": "2026-10-10T05:47:01.100Z",
+          "type": "ALERT_INGESTED",
+          "description": "Alert ingested from Cloud Monitoring Pub/Sub: Cloud Run log-based alert: Database connection pool exhausted"
+        },
+        {
+          "timestamp": "2026-10-10T05:47:01.105Z",
+          "type": "EVIDENCE_GATHERED",
+          "description": "Harvested 6 error logs, recent deploy order-checkout-service-00001-v100, and telemetry metrics.",
+          "metadata": {}
+        },
+        {
+          "timestamp": "2026-10-10T05:47:01.131Z",
+          "type": "DIAGNOSIS_COMPLETE",
+          "description": "Gemini diagnosis generated with HIGH (96%) confidence. Likely cause: Cloud Run service citizen-certificate-portal experienced an unhandled 5xx error .",
+          "metadata": {}
+        }
+      ],
+      "updatedAt": "2026-10-10T05:47:01.159Z",
+      "evidence": {
+        "serviceName": "citizen-certificate-portal",
+        "gatheredAt": "2026-10-10T05:47:01.105Z",
+        "collectionDurationMs": 3,
+        "cloudLogging": {
+          "totalLogsEvaluated": 7,
+          "errorCount": 6,
+          "uniqueErrorSignatures": [
+            {
+              "signature": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "count": 6,
+              "sampleTimestamp": "2026-10-10T05:47:01.099179+00:00",
+              "stackTrace": null,
+              "httpStatus": 500
+            }
+          ],
+          "recentErrorSamples": [
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:01.099179+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:46:20.932924+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:46:20.299885+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:46:19.533910+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:46:18.186414+00:00"
+            }
+          ]
+        },
+        "cloudDeploy": {
+          "activeRevisionId": "order-checkout-service-00001-v100",
+          "activeVersion": "1.0.0",
+          "activeImage": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+          "deployedAt": "2026-10-10T09:15:00.000Z",
+          "minutesSinceDeploy": 1,
+          "author": "sarah.connor@enterprise.com",
+          "commit": {
+            "hash": "8a21f4c",
+            "branch": "main",
+            "message": "fix: update stripe checkout session timeout handling",
+            "diff": "--- a/src/checkout.js\n+++ b/src/checkout.js\n@@ -34,3 +34,4 @@\n-  const timeout = 5000;\n+  const timeout = 8000;\n+  session.setTimeout(timeout);"
+          },
+          "previousStableRevision": {
+            "id": "order-checkout-service-00001-v100",
+            "version": "1.0.0",
+            "image": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+            "deployedAt": "2026-10-10T09:15:00.000Z",
+            "author": "sarah.connor@enterprise.com"
+          }
+        },
+        "cloudMonitoring": {
+          "errorRatePercent": 0,
+          "p50LatencyMs": 35,
+          "p95LatencyMs": 65,
+          "p99LatencyMs": 95,
+          "totalRequestsInWindow": 0,
+          "metricThresholdCondition": "run.googleapis.com/request_count with response_code_class >= 500 > 5%"
+        },
+        "correlation": {
+          "temporalMatch": true,
+          "summary": "Error spike (0%) appeared immediately following deployment of revision order-checkout-service-00001-v100 (commit 8a21f4c) by sarah.connor@enterprise.com."
+        }
+      },
+      "diagnosis": {
+        "likelyCause": "Cloud Run service citizen-certificate-portal experienced an unhandled 5xx error surge (0%) following deployment order-checkout-service-00001-v100.",
+        "confidence": "HIGH (96%)",
+        "confidenceScore": 96,
+        "supportingEvidence": [
+          "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+          "Temporal correlation: Inflection point matches deployment timestamp 2026-10-10T09:15:00.000Z."
+        ],
+        "nextSteps": [
+          "Step 1: Inspect active container instances in Cloud Run console.",
+          "Step 2: Revert traffic to known good revision.",
+          "Step 3: Review application error logs in Cloud Logging."
+        ],
+        "rollbackPlan": {
+          "recommended": true,
+          "targetRevision": "order-checkout-service-00001-v100"
+        },
+        "aiModel": "Gemini on Vertex AI (gemini-3.8-flash)",
+        "analyzedAt": "2026-10-10T05:47:01.131Z"
+      }
+    },
+    {
+      "id": "INC-554092",
+      "service": "citizen-certificate-portal",
+      "title": "Elevated 5xx Errors on citizen-certificate-portal",
+      "severity": "CRITICAL",
+      "status": "DIAGNOSED",
+      "alertPayload": {
+        "incident_id": "554092",
+        "condition_name": "Cloud Run log-based alert: Database connection pool exhausted",
+        "policy_name": "Citizen Portal Peak Application Deadline Outage Policy",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "service_name": "citizen-certificate-portal",
+            "project_id": "incidentlens-gov-gcp",
+            "location": "us-central1"
+          }
+        },
+        "summary": "Citizen Portal (certificates & ration cards) failing under peak deadline load: Database connection pool limit (20) reached.",
+        "started_at": 1791611176,
+        "state": "open"
+      },
+      "createdAt": "2026-10-10T05:47:01.615Z",
+      "timeline": [
+        {
+          "timestamp": "2026-10-10T05:47:01.615Z",
+          "type": "ALERT_INGESTED",
+          "description": "Alert ingested from Cloud Monitoring Pub/Sub: Cloud Run log-based alert: Database connection pool exhausted"
+        },
+        {
+          "timestamp": "2026-10-10T05:47:01.621Z",
+          "type": "EVIDENCE_GATHERED",
+          "description": "Harvested 7 error logs, recent deploy order-checkout-service-00001-v100, and telemetry metrics.",
+          "metadata": {}
+        },
+        {
+          "timestamp": "2026-10-10T05:47:01.638Z",
+          "type": "DIAGNOSIS_COMPLETE",
+          "description": "Gemini diagnosis generated with HIGH (96%) confidence. Likely cause: Cloud Run service citizen-certificate-portal experienced an unhandled 5xx error .",
+          "metadata": {}
+        }
+      ],
+      "updatedAt": "2026-10-10T05:47:01.663Z",
+      "evidence": {
+        "serviceName": "citizen-certificate-portal",
+        "gatheredAt": "2026-10-10T05:47:01.621Z",
+        "collectionDurationMs": 4,
+        "cloudLogging": {
+          "totalLogsEvaluated": 8,
+          "errorCount": 7,
+          "uniqueErrorSignatures": [
+            {
+              "signature": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "count": 7,
+              "sampleTimestamp": "2026-10-10T05:47:01.614638+00:00",
+              "stackTrace": null,
+              "httpStatus": 500
+            }
+          ],
+          "recentErrorSamples": [
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:01.614638+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:01.099179+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:46:20.932924+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:46:20.299885+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:46:19.533910+00:00"
+            }
+          ]
+        },
+        "cloudDeploy": {
+          "activeRevisionId": "order-checkout-service-00001-v100",
+          "activeVersion": "1.0.0",
+          "activeImage": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+          "deployedAt": "2026-10-10T09:15:00.000Z",
+          "minutesSinceDeploy": 1,
+          "author": "sarah.connor@enterprise.com",
+          "commit": {
+            "hash": "8a21f4c",
+            "branch": "main",
+            "message": "fix: update stripe checkout session timeout handling",
+            "diff": "--- a/src/checkout.js\n+++ b/src/checkout.js\n@@ -34,3 +34,4 @@\n-  const timeout = 5000;\n+  const timeout = 8000;\n+  session.setTimeout(timeout);"
+          },
+          "previousStableRevision": {
+            "id": "order-checkout-service-00001-v100",
+            "version": "1.0.0",
+            "image": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+            "deployedAt": "2026-10-10T09:15:00.000Z",
+            "author": "sarah.connor@enterprise.com"
+          }
+        },
+        "cloudMonitoring": {
+          "errorRatePercent": 0,
+          "p50LatencyMs": 35,
+          "p95LatencyMs": 65,
+          "p99LatencyMs": 95,
+          "totalRequestsInWindow": 0,
+          "metricThresholdCondition": "run.googleapis.com/request_count with response_code_class >= 500 > 5%"
+        },
+        "correlation": {
+          "temporalMatch": true,
+          "summary": "Error spike (0%) appeared immediately following deployment of revision order-checkout-service-00001-v100 (commit 8a21f4c) by sarah.connor@enterprise.com."
+        }
+      },
+      "diagnosis": {
+        "likelyCause": "Cloud Run service citizen-certificate-portal experienced an unhandled 5xx error surge (0%) following deployment order-checkout-service-00001-v100.",
+        "confidence": "HIGH (96%)",
+        "confidenceScore": 96,
+        "supportingEvidence": [
+          "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+          "Temporal correlation: Inflection point matches deployment timestamp 2026-10-10T09:15:00.000Z."
+        ],
+        "nextSteps": [
+          "Step 1: Inspect active container instances in Cloud Run console.",
+          "Step 2: Revert traffic to known good revision.",
+          "Step 3: Review application error logs in Cloud Logging."
+        ],
+        "rollbackPlan": {
+          "recommended": true,
+          "targetRevision": "order-checkout-service-00001-v100"
+        },
+        "aiModel": "Gemini on Vertex AI (gemini-3.8-flash)",
+        "analyzedAt": "2026-10-10T05:47:01.638Z"
+      }
+    },
+    {
+      "id": "INC-863981",
+      "service": "citizen-certificate-portal",
+      "title": "Elevated 5xx Errors on citizen-certificate-portal",
+      "severity": "CRITICAL",
+      "status": "DIAGNOSED",
+      "alertPayload": {
+        "incident_id": "863981",
+        "condition_name": "Cloud Run log-based alert: Database connection pool exhausted",
+        "policy_name": "Citizen Portal Peak Application Deadline Outage Policy",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "service_name": "citizen-certificate-portal",
+            "project_id": "incidentlens-gov-gcp",
+            "location": "us-central1"
+          }
+        },
+        "summary": "Citizen Portal (certificates & ration cards) failing under peak deadline load: Database connection pool limit (20) reached.",
+        "started_at": 1791611177,
+        "state": "open"
+      },
+      "createdAt": "2026-10-10T05:47:02.311Z",
+      "timeline": [
+        {
+          "timestamp": "2026-10-10T05:47:02.311Z",
+          "type": "ALERT_INGESTED",
+          "description": "Alert ingested from Cloud Monitoring Pub/Sub: Cloud Run log-based alert: Database connection pool exhausted"
+        },
+        {
+          "timestamp": "2026-10-10T05:47:02.316Z",
+          "type": "EVIDENCE_GATHERED",
+          "description": "Harvested 8 error logs, recent deploy order-checkout-service-00001-v100, and telemetry metrics.",
+          "metadata": {}
+        },
+        {
+          "timestamp": "2026-10-10T05:47:02.321Z",
+          "type": "DIAGNOSIS_COMPLETE",
+          "description": "Gemini diagnosis generated with HIGH (96%) confidence. Likely cause: Cloud Run service citizen-certificate-portal experienced an unhandled 5xx error .",
+          "metadata": {}
+        }
+      ],
+      "updatedAt": "2026-10-10T05:47:02.323Z",
+      "evidence": {
+        "serviceName": "citizen-certificate-portal",
+        "gatheredAt": "2026-10-10T05:47:02.316Z",
+        "collectionDurationMs": 4,
+        "cloudLogging": {
+          "totalLogsEvaluated": 9,
+          "errorCount": 8,
+          "uniqueErrorSignatures": [
+            {
+              "signature": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "count": 8,
+              "sampleTimestamp": "2026-10-10T05:47:02.310076+00:00",
+              "stackTrace": null,
+              "httpStatus": 500
+            }
+          ],
+          "recentErrorSamples": [
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:02.310076+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:01.614638+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:01.099179+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:46:20.932924+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:46:20.299885+00:00"
+            }
+          ]
+        },
+        "cloudDeploy": {
+          "activeRevisionId": "order-checkout-service-00001-v100",
+          "activeVersion": "1.0.0",
+          "activeImage": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+          "deployedAt": "2026-10-10T09:15:00.000Z",
+          "minutesSinceDeploy": 1,
+          "author": "sarah.connor@enterprise.com",
+          "commit": {
+            "hash": "8a21f4c",
+            "branch": "main",
+            "message": "fix: update stripe checkout session timeout handling",
+            "diff": "--- a/src/checkout.js\n+++ b/src/checkout.js\n@@ -34,3 +34,4 @@\n-  const timeout = 5000;\n+  const timeout = 8000;\n+  session.setTimeout(timeout);"
+          },
+          "previousStableRevision": {
+            "id": "order-checkout-service-00001-v100",
+            "version": "1.0.0",
+            "image": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+            "deployedAt": "2026-10-10T09:15:00.000Z",
+            "author": "sarah.connor@enterprise.com"
+          }
+        },
+        "cloudMonitoring": {
+          "errorRatePercent": 0,
+          "p50LatencyMs": 35,
+          "p95LatencyMs": 65,
+          "p99LatencyMs": 95,
+          "totalRequestsInWindow": 0,
+          "metricThresholdCondition": "run.googleapis.com/request_count with response_code_class >= 500 > 5%"
+        },
+        "correlation": {
+          "temporalMatch": true,
+          "summary": "Error spike (0%) appeared immediately following deployment of revision order-checkout-service-00001-v100 (commit 8a21f4c) by sarah.connor@enterprise.com."
+        }
+      },
+      "diagnosis": {
+        "likelyCause": "Cloud Run service citizen-certificate-portal experienced an unhandled 5xx error surge (0%) following deployment order-checkout-service-00001-v100.",
+        "confidence": "HIGH (96%)",
+        "confidenceScore": 96,
+        "supportingEvidence": [
+          "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+          "Temporal correlation: Inflection point matches deployment timestamp 2026-10-10T09:15:00.000Z."
+        ],
+        "nextSteps": [
+          "Step 1: Inspect active container instances in Cloud Run console.",
+          "Step 2: Revert traffic to known good revision.",
+          "Step 3: Review application error logs in Cloud Logging."
+        ],
+        "rollbackPlan": {
+          "recommended": true,
+          "targetRevision": "order-checkout-service-00001-v100"
+        },
+        "aiModel": "Gemini on Vertex AI (gemini-3.8-flash)",
+        "analyzedAt": "2026-10-10T05:47:02.321Z"
+      }
+    },
+    {
+      "id": "INC-650568",
+      "service": "citizen-certificate-portal",
+      "title": "Elevated 5xx Errors on citizen-certificate-portal",
+      "severity": "CRITICAL",
+      "status": "DIAGNOSED",
+      "alertPayload": {
+        "incident_id": "650568",
+        "condition_name": "Cloud Run log-based alert: Database connection pool exhausted",
+        "policy_name": "Citizen Portal Peak Application Deadline Outage Policy",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "service_name": "citizen-certificate-portal",
+            "project_id": "incidentlens-gov-gcp",
+            "location": "us-central1"
+          }
+        },
+        "summary": "Citizen Portal (certificates & ration cards) failing under peak deadline load: Database connection pool limit (20) reached.",
+        "started_at": 1791611179,
+        "state": "open"
+      },
+      "createdAt": "2026-10-10T05:47:04.583Z",
+      "timeline": [
+        {
+          "timestamp": "2026-10-10T05:47:04.583Z",
+          "type": "ALERT_INGESTED",
+          "description": "Alert ingested from Cloud Monitoring Pub/Sub: Cloud Run log-based alert: Database connection pool exhausted"
+        },
+        {
+          "timestamp": "2026-10-10T05:47:04.594Z",
+          "type": "EVIDENCE_GATHERED",
+          "description": "Harvested 9 error logs, recent deploy order-checkout-service-00001-v100, and telemetry metrics.",
+          "metadata": {}
+        },
+        {
+          "timestamp": "2026-10-10T05:47:04.610Z",
+          "type": "DIAGNOSIS_COMPLETE",
+          "description": "Gemini diagnosis generated with HIGH (96%) confidence. Likely cause: Cloud Run service citizen-certificate-portal experienced an unhandled 5xx error .",
+          "metadata": {}
+        }
+      ],
+      "updatedAt": "2026-10-10T05:47:04.634Z",
+      "evidence": {
+        "serviceName": "citizen-certificate-portal",
+        "gatheredAt": "2026-10-10T05:47:04.593Z",
+        "collectionDurationMs": 4,
+        "cloudLogging": {
+          "totalLogsEvaluated": 10,
+          "errorCount": 9,
+          "uniqueErrorSignatures": [
+            {
+              "signature": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "count": 9,
+              "sampleTimestamp": "2026-10-10T05:47:04.580821+00:00",
+              "stackTrace": null,
+              "httpStatus": 500
+            }
+          ],
+          "recentErrorSamples": [
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:04.580821+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:02.310076+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:01.614638+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:01.099179+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:46:20.932924+00:00"
+            }
+          ]
+        },
+        "cloudDeploy": {
+          "activeRevisionId": "order-checkout-service-00001-v100",
+          "activeVersion": "1.0.0",
+          "activeImage": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+          "deployedAt": "2026-10-10T09:15:00.000Z",
+          "minutesSinceDeploy": 1,
+          "author": "sarah.connor@enterprise.com",
+          "commit": {
+            "hash": "8a21f4c",
+            "branch": "main",
+            "message": "fix: update stripe checkout session timeout handling",
+            "diff": "--- a/src/checkout.js\n+++ b/src/checkout.js\n@@ -34,3 +34,4 @@\n-  const timeout = 5000;\n+  const timeout = 8000;\n+  session.setTimeout(timeout);"
+          },
+          "previousStableRevision": {
+            "id": "order-checkout-service-00001-v100",
+            "version": "1.0.0",
+            "image": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+            "deployedAt": "2026-10-10T09:15:00.000Z",
+            "author": "sarah.connor@enterprise.com"
+          }
+        },
+        "cloudMonitoring": {
+          "errorRatePercent": 0,
+          "p50LatencyMs": 35,
+          "p95LatencyMs": 65,
+          "p99LatencyMs": 95,
+          "totalRequestsInWindow": 0,
+          "metricThresholdCondition": "run.googleapis.com/request_count with response_code_class >= 500 > 5%"
+        },
+        "correlation": {
+          "temporalMatch": true,
+          "summary": "Error spike (0%) appeared immediately following deployment of revision order-checkout-service-00001-v100 (commit 8a21f4c) by sarah.connor@enterprise.com."
+        }
+      },
+      "diagnosis": {
+        "likelyCause": "Cloud Run service citizen-certificate-portal experienced an unhandled 5xx error surge (0%) following deployment order-checkout-service-00001-v100.",
+        "confidence": "HIGH (96%)",
+        "confidenceScore": 96,
+        "supportingEvidence": [
+          "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+          "Temporal correlation: Inflection point matches deployment timestamp 2026-10-10T09:15:00.000Z."
+        ],
+        "nextSteps": [
+          "Step 1: Inspect active container instances in Cloud Run console.",
+          "Step 2: Revert traffic to known good revision.",
+          "Step 3: Review application error logs in Cloud Logging."
+        ],
+        "rollbackPlan": {
+          "recommended": true,
+          "targetRevision": "order-checkout-service-00001-v100"
+        },
+        "aiModel": "Gemini on Vertex AI (gemini-3.8-flash)",
+        "analyzedAt": "2026-10-10T05:47:04.610Z"
+      }
+    },
+    {
+      "id": "INC-480488",
+      "service": "citizen-certificate-portal",
+      "title": "Elevated 5xx Errors on citizen-certificate-portal",
+      "severity": "CRITICAL",
+      "status": "RESOLVED",
+      "alertPayload": {
+        "incident_id": "480488",
+        "condition_name": "Cloud Run log-based alert: Database connection pool exhausted",
+        "policy_name": "Citizen Portal Peak Application Deadline Outage Policy",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "service_name": "citizen-certificate-portal",
+            "project_id": "incidentlens-gov-gcp",
+            "location": "us-central1"
+          }
+        },
+        "summary": "Citizen Portal (certificates & ration cards) failing under peak deadline load: Database connection pool limit (20) reached.",
+        "started_at": 1791611180,
+        "state": "open"
+      },
+      "createdAt": "2026-10-10T05:47:05.600Z",
+      "timeline": [
+        {
+          "timestamp": "2026-10-10T05:47:05.600Z",
+          "type": "ALERT_INGESTED",
+          "description": "Alert ingested from Cloud Monitoring Pub/Sub: Cloud Run log-based alert: Database connection pool exhausted"
+        },
+        {
+          "timestamp": "2026-10-10T05:47:05.607Z",
+          "type": "EVIDENCE_GATHERED",
+          "description": "Harvested 10 error logs, recent deploy order-checkout-service-00001-v100, and telemetry metrics.",
+          "metadata": {}
+        },
+        {
+          "timestamp": "2026-10-10T05:47:05.627Z",
+          "type": "DIAGNOSIS_COMPLETE",
+          "description": "Gemini diagnosis generated with HIGH (96%) confidence. Likely cause: Cloud Run service citizen-certificate-portal experienced an unhandled 5xx error .",
+          "metadata": {}
+        },
+        {
+          "timestamp": "2026-10-10T05:47:10.177Z",
+          "type": "ROLLBACK_APPROVED",
+          "description": "Rollback authorized by Alex Chen (On-Call Lead). Migrating Cloud Run traffic to order-checkout-service-00001-v100.",
+          "metadata": {
+            "approvedBy": "Alex Chen (On-Call Lead)",
+            "targetRevisionId": "order-checkout-service-00001-v100"
+          }
+        },
+        {
+          "timestamp": "2026-10-10T05:47:10.214Z",
+          "type": "INCIDENT_RESOLVED",
+          "description": "Traffic successfully reverted to order-checkout-service-00001-v100. Verification probes passed 10/10. Error rate: 0%.",
+          "metadata": {
+            "incidentId": "INC-480488",
+            "success": true,
+            "targetRevision": "order-checkout-service-00001-v100",
+            "restoredVersion": "1.0.0",
+            "executedAt": "2026-10-10T05:47:10.197Z",
+            "probesPassed": 10,
+            "probesTotal": 10,
+            "postRollbackMetrics": {
+              "totalRequests": 10,
+              "errorCount": 0,
+              "errorRate": 0,
+              "rollingErrorRate": 0,
+              "p50LatencyMs": 41,
+              "p95LatencyMs": 51,
+              "p99LatencyMs": 51,
+              "activeRevision": {
+                "id": "order-checkout-service-00001-v100",
+                "version": "1.0.0",
+                "image": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+                "deployedAt": "2026-10-10T09:15:00.000Z",
+                "author": "sarah.connor@enterprise.com",
+                "commit": {
+                  "hash": "8a21f4c",
+                  "branch": "main",
+                  "message": "fix: update stripe checkout session timeout handling",
+                  "diff": "--- a/src/checkout.js\n+++ b/src/checkout.js\n@@ -34,3 +34,4 @@\n-  const timeout = 5000;\n+  const timeout = 8000;\n+  session.setTimeout(timeout);"
+                },
+                "status": "HEALTHY",
+                "active": true,
+                "trafficPercent": 100,
+                "notes": "Stable production revision. 0.02% baseline error rate."
+              }
+            }
+          }
+        },
+        {
+          "timestamp": "2026-10-10T05:47:11.172Z",
+          "type": "ROLLBACK_APPROVED",
+          "description": "Rollback authorized by Alex Chen (On-Call Lead). Migrating Cloud Run traffic to order-checkout-service-00001-v100.",
+          "metadata": {
+            "approvedBy": "Alex Chen (On-Call Lead)",
+            "targetRevisionId": "order-checkout-service-00001-v100"
+          }
+        },
+        {
+          "timestamp": "2026-10-10T05:47:11.223Z",
+          "type": "INCIDENT_RESOLVED",
+          "description": "Traffic successfully reverted to order-checkout-service-00001-v100. Verification probes passed 10/10. Error rate: 0%.",
+          "metadata": {
+            "incidentId": "INC-480488",
+            "success": true,
+            "targetRevision": "order-checkout-service-00001-v100",
+            "restoredVersion": "1.0.0",
+            "executedAt": "2026-10-10T05:47:11.199Z",
+            "probesPassed": 10,
+            "probesTotal": 10,
+            "postRollbackMetrics": {
+              "totalRequests": 20,
+              "errorCount": 0,
+              "errorRate": 0,
+              "rollingErrorRate": 0,
+              "p50LatencyMs": 41,
+              "p95LatencyMs": 54,
+              "p99LatencyMs": 54,
+              "activeRevision": {
+                "id": "order-checkout-service-00001-v100",
+                "version": "1.0.0",
+                "image": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+                "deployedAt": "2026-10-10T09:15:00.000Z",
+                "author": "sarah.connor@enterprise.com",
+                "commit": {
+                  "hash": "8a21f4c",
+                  "branch": "main",
+                  "message": "fix: update stripe checkout session timeout handling",
+                  "diff": "--- a/src/checkout.js\n+++ b/src/checkout.js\n@@ -34,3 +34,4 @@\n-  const timeout = 5000;\n+  const timeout = 8000;\n+  session.setTimeout(timeout);"
+                },
+                "status": "HEALTHY",
+                "active": true,
+                "trafficPercent": 100,
+                "notes": "Stable production revision. 0.02% baseline error rate."
+              }
+            }
+          }
+        },
+        {
+          "timestamp": "2026-10-10T05:47:12.186Z",
+          "type": "ROLLBACK_APPROVED",
+          "description": "Rollback authorized by Alex Chen (On-Call Lead). Migrating Cloud Run traffic to order-checkout-service-00001-v100.",
+          "metadata": {
+            "approvedBy": "Alex Chen (On-Call Lead)",
+            "targetRevisionId": "order-checkout-service-00001-v100"
+          }
+        },
+        {
+          "timestamp": "2026-10-10T05:47:12.232Z",
+          "type": "INCIDENT_RESOLVED",
+          "description": "Traffic successfully reverted to order-checkout-service-00001-v100. Verification probes passed 10/10. Error rate: 0%.",
+          "metadata": {
+            "incidentId": "INC-480488",
+            "success": true,
+            "targetRevision": "order-checkout-service-00001-v100",
+            "restoredVersion": "1.0.0",
+            "executedAt": "2026-10-10T05:47:12.210Z",
+            "probesPassed": 10,
+            "probesTotal": 10,
+            "postRollbackMetrics": {
+              "totalRequests": 30,
+              "errorCount": 0,
+              "errorRate": 0,
+              "rollingErrorRate": 0,
+              "p50LatencyMs": 41,
+              "p95LatencyMs": 54,
+              "p99LatencyMs": 54,
+              "activeRevision": {
+                "id": "order-checkout-service-00001-v100",
+                "version": "1.0.0",
+                "image": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+                "deployedAt": "2026-10-10T09:15:00.000Z",
+                "author": "sarah.connor@enterprise.com",
+                "commit": {
+                  "hash": "8a21f4c",
+                  "branch": "main",
+                  "message": "fix: update stripe checkout session timeout handling",
+                  "diff": "--- a/src/checkout.js\n+++ b/src/checkout.js\n@@ -34,3 +34,4 @@\n-  const timeout = 5000;\n+  const timeout = 8000;\n+  session.setTimeout(timeout);"
+                },
+                "status": "HEALTHY",
+                "active": true,
+                "trafficPercent": 100,
+                "notes": "Stable production revision. 0.02% baseline error rate."
+              }
+            }
+          }
+        }
+      ],
+      "updatedAt": "2026-10-10T05:47:12.232Z",
+      "evidence": {
+        "serviceName": "citizen-certificate-portal",
+        "gatheredAt": "2026-10-10T05:47:05.606Z",
+        "collectionDurationMs": 3,
+        "cloudLogging": {
+          "totalLogsEvaluated": 11,
+          "errorCount": 10,
+          "uniqueErrorSignatures": [
+            {
+              "signature": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "count": 10,
+              "sampleTimestamp": "2026-10-10T05:47:05.599890+00:00",
+              "stackTrace": null,
+              "httpStatus": 500
+            }
+          ],
+          "recentErrorSamples": [
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:05.599890+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:04.580821+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:02.310076+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:01.614638+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:01.099179+00:00"
+            }
+          ]
+        },
+        "cloudDeploy": {
+          "activeRevisionId": "order-checkout-service-00001-v100",
+          "activeVersion": "1.0.0",
+          "activeImage": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+          "deployedAt": "2026-10-10T09:15:00.000Z",
+          "minutesSinceDeploy": 1,
+          "author": "sarah.connor@enterprise.com",
+          "commit": {
+            "hash": "8a21f4c",
+            "branch": "main",
+            "message": "fix: update stripe checkout session timeout handling",
+            "diff": "--- a/src/checkout.js\n+++ b/src/checkout.js\n@@ -34,3 +34,4 @@\n-  const timeout = 5000;\n+  const timeout = 8000;\n+  session.setTimeout(timeout);"
+          },
+          "previousStableRevision": {
+            "id": "order-checkout-service-00001-v100",
+            "version": "1.0.0",
+            "image": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+            "deployedAt": "2026-10-10T09:15:00.000Z",
+            "author": "sarah.connor@enterprise.com"
+          }
+        },
+        "cloudMonitoring": {
+          "errorRatePercent": 0,
+          "p50LatencyMs": 35,
+          "p95LatencyMs": 65,
+          "p99LatencyMs": 95,
+          "totalRequestsInWindow": 0,
+          "metricThresholdCondition": "run.googleapis.com/request_count with response_code_class >= 500 > 5%"
+        },
+        "correlation": {
+          "temporalMatch": true,
+          "summary": "Error spike (0%) appeared immediately following deployment of revision order-checkout-service-00001-v100 (commit 8a21f4c) by sarah.connor@enterprise.com."
+        }
+      },
+      "diagnosis": {
+        "likelyCause": "Cloud Run service citizen-certificate-portal experienced an unhandled 5xx error surge (0%) following deployment order-checkout-service-00001-v100.",
+        "confidence": "HIGH (96%)",
+        "confidenceScore": 96,
+        "supportingEvidence": [
+          "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+          "Temporal correlation: Inflection point matches deployment timestamp 2026-10-10T09:15:00.000Z."
+        ],
+        "nextSteps": [
+          "Step 1: Inspect active container instances in Cloud Run console.",
+          "Step 2: Revert traffic to known good revision.",
+          "Step 3: Review application error logs in Cloud Logging."
+        ],
+        "rollbackPlan": {
+          "recommended": true,
+          "targetRevision": "order-checkout-service-00001-v100"
+        },
+        "aiModel": "Gemini on Vertex AI (gemini-3.8-flash)",
+        "analyzedAt": "2026-10-10T05:47:05.627Z"
+      },
+      "resolutionNotes": "Mitigated in 6s via rollback to order-checkout-service-00001-v100 by Alex Chen (On-Call Lead)",
+      "resolvedAt": "2026-10-10T05:47:12.210Z",
+      "timeToMitigateSeconds": 7
+    },
+    {
+      "id": "INC-182143",
+      "service": "citizen-certificate-portal",
+      "title": "Elevated 5xx Errors on citizen-certificate-portal",
+      "severity": "CRITICAL",
+      "status": "DIAGNOSED",
+      "alertPayload": {
+        "incident_id": "182143",
+        "condition_name": "Cloud Run log-based alert: Database connection pool exhausted",
+        "policy_name": "Citizen Portal Peak Application Deadline Outage Policy",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "service_name": "citizen-certificate-portal",
+            "project_id": "incidentlens-gov-gcp",
+            "location": "us-central1"
+          }
+        },
+        "summary": "Citizen Portal (certificates & ration cards) failing under peak deadline load: Database connection pool limit (20) reached.",
+        "started_at": 1791611212,
+        "state": "open"
+      },
+      "createdAt": "2026-10-10T05:47:37.363Z",
+      "timeline": [
+        {
+          "timestamp": "2026-10-10T05:47:37.363Z",
+          "type": "ALERT_INGESTED",
+          "description": "Alert ingested from Cloud Monitoring Pub/Sub: Cloud Run log-based alert: Database connection pool exhausted"
+        },
+        {
+          "timestamp": "2026-10-10T05:47:37.369Z",
+          "type": "EVIDENCE_GATHERED",
+          "description": "Harvested 11 error logs, recent deploy order-checkout-service-00001-v100, and telemetry metrics.",
+          "metadata": {}
+        },
+        {
+          "timestamp": "2026-10-10T05:47:37.390Z",
+          "type": "DIAGNOSIS_COMPLETE",
+          "description": "Gemini diagnosis generated with HIGH (96%) confidence. Likely cause: Cloud Run service citizen-certificate-portal experienced an unhandled 5xx error .",
+          "metadata": {}
+        }
+      ],
+      "updatedAt": "2026-10-10T05:47:37.415Z",
+      "evidence": {
+        "serviceName": "citizen-certificate-portal",
+        "gatheredAt": "2026-10-10T05:47:37.369Z",
+        "collectionDurationMs": 4,
+        "cloudLogging": {
+          "totalLogsEvaluated": 12,
+          "errorCount": 11,
+          "uniqueErrorSignatures": [
+            {
+              "signature": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "count": 11,
+              "sampleTimestamp": "2026-10-10T05:47:37.361867+00:00",
+              "stackTrace": null,
+              "httpStatus": 500
+            }
+          ],
+          "recentErrorSamples": [
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:37.361867+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:05.599890+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:04.580821+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:02.310076+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:01.614638+00:00"
+            }
+          ]
+        },
+        "cloudDeploy": {
+          "activeRevisionId": "order-checkout-service-00001-v100",
+          "activeVersion": "1.0.0",
+          "activeImage": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+          "deployedAt": "2026-10-10T09:15:00.000Z",
+          "minutesSinceDeploy": 1,
+          "author": "sarah.connor@enterprise.com",
+          "commit": {
+            "hash": "8a21f4c",
+            "branch": "main",
+            "message": "fix: update stripe checkout session timeout handling",
+            "diff": "--- a/src/checkout.js\n+++ b/src/checkout.js\n@@ -34,3 +34,4 @@\n-  const timeout = 5000;\n+  const timeout = 8000;\n+  session.setTimeout(timeout);"
+          },
+          "previousStableRevision": {
+            "id": "order-checkout-service-00001-v100",
+            "version": "1.0.0",
+            "image": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+            "deployedAt": "2026-10-10T09:15:00.000Z",
+            "author": "sarah.connor@enterprise.com"
+          }
+        },
+        "cloudMonitoring": {
+          "errorRatePercent": 0,
+          "p50LatencyMs": 41,
+          "p95LatencyMs": 54,
+          "p99LatencyMs": 54,
+          "totalRequestsInWindow": 30,
+          "metricThresholdCondition": "run.googleapis.com/request_count with response_code_class >= 500 > 5%"
+        },
+        "correlation": {
+          "temporalMatch": true,
+          "summary": "Error spike (0%) appeared immediately following deployment of revision order-checkout-service-00001-v100 (commit 8a21f4c) by sarah.connor@enterprise.com."
+        }
+      },
+      "diagnosis": {
+        "likelyCause": "Cloud Run service citizen-certificate-portal experienced an unhandled 5xx error surge (0%) following deployment order-checkout-service-00001-v100.",
+        "confidence": "HIGH (96%)",
+        "confidenceScore": 96,
+        "supportingEvidence": [
+          "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+          "Temporal correlation: Inflection point matches deployment timestamp 2026-10-10T09:15:00.000Z."
+        ],
+        "nextSteps": [
+          "Step 1: Inspect active container instances in Cloud Run console.",
+          "Step 2: Revert traffic to known good revision.",
+          "Step 3: Review application error logs in Cloud Logging."
+        ],
+        "rollbackPlan": {
+          "recommended": true,
+          "targetRevision": "order-checkout-service-00001-v100"
+        },
+        "aiModel": "Gemini on Vertex AI (gemini-3.8-flash)",
+        "analyzedAt": "2026-10-10T05:47:37.390Z"
+      },
+      "slackMessageId": "SLACK_MSG_1791611257415"
+    },
+    {
+      "id": "INC-477636",
+      "service": "citizen-certificate-portal",
+      "title": "Elevated 5xx Errors on citizen-certificate-portal",
+      "severity": "CRITICAL",
+      "status": "DIAGNOSED",
+      "alertPayload": {
+        "incident_id": "477636",
+        "condition_name": "Cloud Run log-based alert: Database connection pool exhausted",
+        "policy_name": "Citizen Portal Peak Application Deadline Outage Policy",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "service_name": "citizen-certificate-portal",
+            "project_id": "incidentlens-gov-gcp",
+            "location": "us-central1"
+          }
+        },
+        "summary": "Citizen Portal (certificates & ration cards) failing under peak deadline load: Database connection pool limit (20) reached.",
+        "started_at": 1791611233,
+        "state": "open"
+      },
+      "createdAt": "2026-10-10T05:47:58.466Z",
+      "timeline": [
+        {
+          "timestamp": "2026-10-10T05:47:58.466Z",
+          "type": "ALERT_INGESTED",
+          "description": "Alert ingested from Cloud Monitoring Pub/Sub: Cloud Run log-based alert: Database connection pool exhausted"
+        },
+        {
+          "timestamp": "2026-10-10T05:47:58.471Z",
+          "type": "EVIDENCE_GATHERED",
+          "description": "Harvested 12 error logs, recent deploy order-checkout-service-00001-v100, and telemetry metrics.",
+          "metadata": {}
+        },
+        {
+          "timestamp": "2026-10-10T05:47:58.477Z",
+          "type": "DIAGNOSIS_COMPLETE",
+          "description": "Gemini diagnosis generated with HIGH (96%) confidence. Likely cause: Cloud Run service citizen-certificate-portal experienced an unhandled 5xx error .",
+          "metadata": {}
+        }
+      ],
+      "updatedAt": "2026-10-10T05:47:58.499Z",
+      "evidence": {
+        "serviceName": "citizen-certificate-portal",
+        "gatheredAt": "2026-10-10T05:47:58.471Z",
+        "collectionDurationMs": 3,
+        "cloudLogging": {
+          "totalLogsEvaluated": 13,
+          "errorCount": 12,
+          "uniqueErrorSignatures": [
+            {
+              "signature": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "count": 12,
+              "sampleTimestamp": "2026-10-10T05:47:58.465115+00:00",
+              "stackTrace": null,
+              "httpStatus": 500
+            }
+          ],
+          "recentErrorSamples": [
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:58.465115+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:37.361867+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:05.599890+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:04.580821+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:02.310076+00:00"
+            }
+          ]
+        },
+        "cloudDeploy": {
+          "activeRevisionId": "order-checkout-service-00001-v100",
+          "activeVersion": "1.0.0",
+          "activeImage": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+          "deployedAt": "2026-10-10T09:15:00.000Z",
+          "minutesSinceDeploy": 1,
+          "author": "sarah.connor@enterprise.com",
+          "commit": {
+            "hash": "8a21f4c",
+            "branch": "main",
+            "message": "fix: update stripe checkout session timeout handling",
+            "diff": "--- a/src/checkout.js\n+++ b/src/checkout.js\n@@ -34,3 +34,4 @@\n-  const timeout = 5000;\n+  const timeout = 8000;\n+  session.setTimeout(timeout);"
+          },
+          "previousStableRevision": {
+            "id": "order-checkout-service-00001-v100",
+            "version": "1.0.0",
+            "image": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+            "deployedAt": "2026-10-10T09:15:00.000Z",
+            "author": "sarah.connor@enterprise.com"
+          }
+        },
+        "cloudMonitoring": {
+          "errorRatePercent": 0,
+          "p50LatencyMs": 41,
+          "p95LatencyMs": 53,
+          "p99LatencyMs": 54,
+          "totalRequestsInWindow": 50,
+          "metricThresholdCondition": "run.googleapis.com/request_count with response_code_class >= 500 > 5%"
+        },
+        "correlation": {
+          "temporalMatch": true,
+          "summary": "Error spike (0%) appeared immediately following deployment of revision order-checkout-service-00001-v100 (commit 8a21f4c) by sarah.connor@enterprise.com."
+        }
+      },
+      "diagnosis": {
+        "likelyCause": "Cloud Run service citizen-certificate-portal experienced an unhandled 5xx error surge (0%) following deployment order-checkout-service-00001-v100.",
+        "confidence": "HIGH (96%)",
+        "confidenceScore": 96,
+        "supportingEvidence": [
+          "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+          "Temporal correlation: Inflection point matches deployment timestamp 2026-10-10T09:15:00.000Z."
+        ],
+        "nextSteps": [
+          "Step 1: Inspect active container instances in Cloud Run console.",
+          "Step 2: Revert traffic to known good revision.",
+          "Step 3: Review application error logs in Cloud Logging."
+        ],
+        "rollbackPlan": {
+          "recommended": true,
+          "targetRevision": "order-checkout-service-00001-v100"
+        },
+        "aiModel": "Gemini on Vertex AI (gemini-3.8-flash)",
+        "analyzedAt": "2026-10-10T05:47:58.477Z"
+      }
+    },
+    {
+      "id": "INC-651343",
+      "service": "citizen-certificate-portal",
+      "title": "Elevated 5xx Errors on citizen-certificate-portal",
+      "severity": "CRITICAL",
+      "status": "DIAGNOSED",
+      "alertPayload": {
+        "incident_id": "651343",
+        "condition_name": "Cloud Run log-based alert: Database connection pool exhausted",
+        "policy_name": "Citizen Portal Peak Application Deadline Outage Policy",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "service_name": "citizen-certificate-portal",
+            "project_id": "incidentlens-gov-gcp",
+            "location": "us-central1"
+          }
+        },
+        "summary": "Citizen Portal (certificates & ration cards) failing under peak deadline load: Database connection pool limit (20) reached.",
+        "started_at": 1791611235,
+        "state": "open"
+      },
+      "createdAt": "2026-10-10T05:48:00.560Z",
+      "timeline": [
+        {
+          "timestamp": "2026-10-10T05:48:00.560Z",
+          "type": "ALERT_INGESTED",
+          "description": "Alert ingested from Cloud Monitoring Pub/Sub: Cloud Run log-based alert: Database connection pool exhausted"
+        },
+        {
+          "timestamp": "2026-10-10T05:48:00.566Z",
+          "type": "EVIDENCE_GATHERED",
+          "description": "Harvested 13 error logs, recent deploy order-checkout-service-00001-v100, and telemetry metrics.",
+          "metadata": {}
+        },
+        {
+          "timestamp": "2026-10-10T05:48:00.587Z",
+          "type": "DIAGNOSIS_COMPLETE",
+          "description": "Gemini diagnosis generated with HIGH (96%) confidence. Likely cause: Cloud Run service citizen-certificate-portal experienced an unhandled 5xx error .",
+          "metadata": {}
+        }
+      ],
+      "updatedAt": "2026-10-10T05:48:00.612Z",
+      "evidence": {
+        "serviceName": "citizen-certificate-portal",
+        "gatheredAt": "2026-10-10T05:48:00.566Z",
+        "collectionDurationMs": 5,
+        "cloudLogging": {
+          "totalLogsEvaluated": 14,
+          "errorCount": 13,
+          "uniqueErrorSignatures": [
+            {
+              "signature": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "count": 13,
+              "sampleTimestamp": "2026-10-10T05:48:00.559566+00:00",
+              "stackTrace": null,
+              "httpStatus": 500
+            }
+          ],
+          "recentErrorSamples": [
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:48:00.559566+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:58.465115+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:37.361867+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:05.599890+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:04.580821+00:00"
+            }
+          ]
+        },
+        "cloudDeploy": {
+          "activeRevisionId": "order-checkout-service-00001-v100",
+          "activeVersion": "1.0.0",
+          "activeImage": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+          "deployedAt": "2026-10-10T09:15:00.000Z",
+          "minutesSinceDeploy": 1,
+          "author": "sarah.connor@enterprise.com",
+          "commit": {
+            "hash": "8a21f4c",
+            "branch": "main",
+            "message": "fix: update stripe checkout session timeout handling",
+            "diff": "--- a/src/checkout.js\n+++ b/src/checkout.js\n@@ -34,3 +34,4 @@\n-  const timeout = 5000;\n+  const timeout = 8000;\n+  session.setTimeout(timeout);"
+          },
+          "previousStableRevision": {
+            "id": "order-checkout-service-00001-v100",
+            "version": "1.0.0",
+            "image": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+            "deployedAt": "2026-10-10T09:15:00.000Z",
+            "author": "sarah.connor@enterprise.com"
+          }
+        },
+        "cloudMonitoring": {
+          "errorRatePercent": 0,
+          "p50LatencyMs": 41,
+          "p95LatencyMs": 53,
+          "p99LatencyMs": 54,
+          "totalRequestsInWindow": 50,
+          "metricThresholdCondition": "run.googleapis.com/request_count with response_code_class >= 500 > 5%"
+        },
+        "correlation": {
+          "temporalMatch": true,
+          "summary": "Error spike (0%) appeared immediately following deployment of revision order-checkout-service-00001-v100 (commit 8a21f4c) by sarah.connor@enterprise.com."
+        }
+      },
+      "diagnosis": {
+        "likelyCause": "Cloud Run service citizen-certificate-portal experienced an unhandled 5xx error surge (0%) following deployment order-checkout-service-00001-v100.",
+        "confidence": "HIGH (96%)",
+        "confidenceScore": 96,
+        "supportingEvidence": [
+          "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+          "Temporal correlation: Inflection point matches deployment timestamp 2026-10-10T09:15:00.000Z."
+        ],
+        "nextSteps": [
+          "Step 1: Inspect active container instances in Cloud Run console.",
+          "Step 2: Revert traffic to known good revision.",
+          "Step 3: Review application error logs in Cloud Logging."
+        ],
+        "rollbackPlan": {
+          "recommended": true,
+          "targetRevision": "order-checkout-service-00001-v100"
+        },
+        "aiModel": "Gemini on Vertex AI (gemini-3.8-flash)",
+        "analyzedAt": "2026-10-10T05:48:00.587Z"
+      }
+    },
+    {
+      "id": "INC-505437",
+      "service": "citizen-certificate-portal",
+      "title": "Elevated 5xx Errors on citizen-certificate-portal",
+      "severity": "CRITICAL",
+      "status": "DIAGNOSED",
+      "alertPayload": {
+        "incident_id": "505437",
+        "condition_name": "Cloud Run log-based alert: Database connection pool exhausted",
+        "policy_name": "Citizen Portal Peak Application Deadline Outage Policy",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "service_name": "citizen-certificate-portal",
+            "project_id": "incidentlens-gov-gcp",
+            "location": "us-central1"
+          }
+        },
+        "summary": "Citizen Portal (certificates & ration cards) failing under peak deadline load: Database connection pool limit (20) reached.",
+        "started_at": 1791611242,
+        "state": "open"
+      },
+      "createdAt": "2026-10-10T05:48:07.087Z",
+      "timeline": [
+        {
+          "timestamp": "2026-10-10T05:48:07.087Z",
+          "type": "ALERT_INGESTED",
+          "description": "Alert ingested from Cloud Monitoring Pub/Sub: Cloud Run log-based alert: Database connection pool exhausted"
+        },
+        {
+          "timestamp": "2026-10-10T05:48:07.093Z",
+          "type": "EVIDENCE_GATHERED",
+          "description": "Harvested 14 error logs, recent deploy order-checkout-service-00001-v100, and telemetry metrics.",
+          "metadata": {}
+        },
+        {
+          "timestamp": "2026-10-10T05:48:07.112Z",
+          "type": "DIAGNOSIS_COMPLETE",
+          "description": "Gemini diagnosis generated with HIGH (96%) confidence. Likely cause: Cloud Run service citizen-certificate-portal experienced an unhandled 5xx error .",
+          "metadata": {}
+        }
+      ],
+      "updatedAt": "2026-10-10T05:48:07.129Z",
+      "evidence": {
+        "serviceName": "citizen-certificate-portal",
+        "gatheredAt": "2026-10-10T05:48:07.092Z",
+        "collectionDurationMs": 3,
+        "cloudLogging": {
+          "totalLogsEvaluated": 15,
+          "errorCount": 14,
+          "uniqueErrorSignatures": [
+            {
+              "signature": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "count": 14,
+              "sampleTimestamp": "2026-10-10T05:48:07.086385+00:00",
+              "stackTrace": null,
+              "httpStatus": 500
+            }
+          ],
+          "recentErrorSamples": [
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:48:07.086385+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:48:00.559566+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:58.465115+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:37.361867+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:05.599890+00:00"
+            }
+          ]
+        },
+        "cloudDeploy": {
+          "activeRevisionId": "order-checkout-service-00001-v100",
+          "activeVersion": "1.0.0",
+          "activeImage": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+          "deployedAt": "2026-10-10T09:15:00.000Z",
+          "minutesSinceDeploy": 1,
+          "author": "sarah.connor@enterprise.com",
+          "commit": {
+            "hash": "8a21f4c",
+            "branch": "main",
+            "message": "fix: update stripe checkout session timeout handling",
+            "diff": "--- a/src/checkout.js\n+++ b/src/checkout.js\n@@ -34,3 +34,4 @@\n-  const timeout = 5000;\n+  const timeout = 8000;\n+  session.setTimeout(timeout);"
+          },
+          "previousStableRevision": {
+            "id": "order-checkout-service-00001-v100",
+            "version": "1.0.0",
+            "image": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+            "deployedAt": "2026-10-10T09:15:00.000Z",
+            "author": "sarah.connor@enterprise.com"
+          }
+        },
+        "cloudMonitoring": {
+          "errorRatePercent": 0,
+          "p50LatencyMs": 41,
+          "p95LatencyMs": 53,
+          "p99LatencyMs": 54,
+          "totalRequestsInWindow": 50,
+          "metricThresholdCondition": "run.googleapis.com/request_count with response_code_class >= 500 > 5%"
+        },
+        "correlation": {
+          "temporalMatch": true,
+          "summary": "Error spike (0%) appeared immediately following deployment of revision order-checkout-service-00001-v100 (commit 8a21f4c) by sarah.connor@enterprise.com."
+        }
+      },
+      "diagnosis": {
+        "likelyCause": "Cloud Run service citizen-certificate-portal experienced an unhandled 5xx error surge (0%) following deployment order-checkout-service-00001-v100.",
+        "confidence": "HIGH (96%)",
+        "confidenceScore": 96,
+        "supportingEvidence": [
+          "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+          "Temporal correlation: Inflection point matches deployment timestamp 2026-10-10T09:15:00.000Z."
+        ],
+        "nextSteps": [
+          "Step 1: Inspect active container instances in Cloud Run console.",
+          "Step 2: Revert traffic to known good revision.",
+          "Step 3: Review application error logs in Cloud Logging."
+        ],
+        "rollbackPlan": {
+          "recommended": true,
+          "targetRevision": "order-checkout-service-00001-v100"
+        },
+        "aiModel": "Gemini on Vertex AI (gemini-3.8-flash)",
+        "analyzedAt": "2026-10-10T05:48:07.112Z"
+      }
+    },
+    {
+      "id": "INC-928322",
+      "service": "citizen-certificate-portal",
+      "title": "Elevated 5xx Errors on citizen-certificate-portal",
+      "severity": "CRITICAL",
+      "status": "RESOLVED",
+      "alertPayload": {
+        "incident_id": "928322",
+        "condition_name": "Cloud Monitoring anomaly spike with zero matching application logs",
+        "policy_name": "Zero-Log Transient Alert",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "service_name": "citizen-certificate-portal",
+            "project_id": "incidentlens-gov-gcp",
+            "location": "us-central1"
+          }
+        },
+        "summary": "Transient metric alert fired but no application error traces found.",
+        "started_at": 1791611242,
+        "state": "open"
+      },
+      "createdAt": "2026-10-10T05:48:07.917Z",
+      "timeline": [
+        {
+          "timestamp": "2026-10-10T05:48:07.917Z",
+          "type": "ALERT_INGESTED",
+          "description": "Alert ingested from Cloud Monitoring Pub/Sub: Cloud Monitoring anomaly spike with zero matching application logs"
+        },
+        {
+          "timestamp": "2026-10-10T05:48:07.923Z",
+          "type": "EVIDENCE_GATHERED",
+          "description": "Harvested 14 error logs, recent deploy order-checkout-service-00001-v100, and telemetry metrics.",
+          "metadata": {}
+        },
+        {
+          "timestamp": "2026-10-10T05:48:07.928Z",
+          "type": "DIAGNOSIS_COMPLETE",
+          "description": "Gemini diagnosis generated with HIGH (96%) confidence. Likely cause: Cloud Run service citizen-certificate-portal experienced an unhandled 5xx error .",
+          "metadata": {}
+        },
+        {
+          "timestamp": "2026-10-10T05:48:11.513Z",
+          "type": "ROLLBACK_APPROVED",
+          "description": "Rollback authorized by Alex Chen (On-Call Lead). Migrating Cloud Run traffic to order-checkout-service-00001-v100.",
+          "metadata": {
+            "approvedBy": "Alex Chen (On-Call Lead)",
+            "targetRevisionId": "order-checkout-service-00001-v100"
+          }
+        },
+        {
+          "timestamp": "2026-10-10T05:48:11.542Z",
+          "type": "INCIDENT_RESOLVED",
+          "description": "Traffic successfully reverted to order-checkout-service-00001-v100. Verification probes passed 10/10. Error rate: 0%.",
+          "metadata": {
+            "incidentId": "INC-928322",
+            "success": true,
+            "targetRevision": "order-checkout-service-00001-v100",
+            "restoredVersion": "1.0.0",
+            "executedAt": "2026-10-10T05:48:11.515Z",
+            "probesPassed": 10,
+            "probesTotal": 10,
+            "postRollbackMetrics": {
+              "totalRequests": 50,
+              "errorCount": 0,
+              "errorRate": 0,
+              "rollingErrorRate": 0,
+              "p50LatencyMs": 37,
+              "p95LatencyMs": 53,
+              "p99LatencyMs": 54,
+              "activeRevision": {
+                "id": "order-checkout-service-00001-v100",
+                "version": "1.0.0",
+                "image": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+                "deployedAt": "2026-10-10T09:15:00.000Z",
+                "author": "sarah.connor@enterprise.com",
+                "commit": {
+                  "hash": "8a21f4c",
+                  "branch": "main",
+                  "message": "fix: update stripe checkout session timeout handling",
+                  "diff": "--- a/src/checkout.js\n+++ b/src/checkout.js\n@@ -34,3 +34,4 @@\n-  const timeout = 5000;\n+  const timeout = 8000;\n+  session.setTimeout(timeout);"
+                },
+                "status": "HEALTHY",
+                "active": true,
+                "trafficPercent": 100,
+                "notes": "Stable production revision. 0.02% baseline error rate."
+              }
+            }
+          }
+        },
+        {
+          "timestamp": "2026-10-10T05:48:13.659Z",
+          "type": "ROLLBACK_APPROVED",
+          "description": "Rollback authorized by Alex Chen (On-Call Lead). Migrating Cloud Run traffic to order-checkout-service-00001-v100.",
+          "metadata": {
+            "approvedBy": "Alex Chen (On-Call Lead)",
+            "targetRevisionId": "order-checkout-service-00001-v100"
+          }
+        },
+        {
+          "timestamp": "2026-10-10T05:48:13.683Z",
+          "type": "INCIDENT_RESOLVED",
+          "description": "Traffic successfully reverted to order-checkout-service-00001-v100. Verification probes passed 10/10. Error rate: 0%.",
+          "metadata": {
+            "incidentId": "INC-928322",
+            "success": true,
+            "targetRevision": "order-checkout-service-00001-v100",
+            "restoredVersion": "1.0.0",
+            "executedAt": "2026-10-10T05:48:13.681Z",
+            "probesPassed": 10,
+            "probesTotal": 10,
+            "postRollbackMetrics": {
+              "totalRequests": 50,
+              "errorCount": 0,
+              "errorRate": 0,
+              "rollingErrorRate": 0,
+              "p50LatencyMs": 42,
+              "p95LatencyMs": 53,
+              "p99LatencyMs": 54,
+              "activeRevision": {
+                "id": "order-checkout-service-00001-v100",
+                "version": "1.0.0",
+                "image": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+                "deployedAt": "2026-10-10T09:15:00.000Z",
+                "author": "sarah.connor@enterprise.com",
+                "commit": {
+                  "hash": "8a21f4c",
+                  "branch": "main",
+                  "message": "fix: update stripe checkout session timeout handling",
+                  "diff": "--- a/src/checkout.js\n+++ b/src/checkout.js\n@@ -34,3 +34,4 @@\n-  const timeout = 5000;\n+  const timeout = 8000;\n+  session.setTimeout(timeout);"
+                },
+                "status": "HEALTHY",
+                "active": true,
+                "trafficPercent": 100,
+                "notes": "Stable production revision. 0.02% baseline error rate."
+              }
+            }
+          }
+        }
+      ],
+      "updatedAt": "2026-10-10T05:48:13.683Z",
+      "evidence": {
+        "serviceName": "citizen-certificate-portal",
+        "gatheredAt": "2026-10-10T05:48:07.923Z",
+        "collectionDurationMs": 4,
+        "cloudLogging": {
+          "totalLogsEvaluated": 15,
+          "errorCount": 14,
+          "uniqueErrorSignatures": [
+            {
+              "signature": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "count": 14,
+              "sampleTimestamp": "2026-10-10T05:48:07.086385+00:00",
+              "stackTrace": null,
+              "httpStatus": 500
+            }
+          ],
+          "recentErrorSamples": [
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:48:07.086385+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:48:00.559566+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:58.465115+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:37.361867+00:00"
+            },
+            {
+              "message": "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+              "metadata": {},
+              "service": "citizen-certificate-portal",
+              "severity": "CRITICAL",
+              "timestamp": "2026-10-10T05:47:05.599890+00:00"
+            }
+          ]
+        },
+        "cloudDeploy": {
+          "activeRevisionId": "order-checkout-service-00001-v100",
+          "activeVersion": "1.0.0",
+          "activeImage": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+          "deployedAt": "2026-10-10T09:15:00.000Z",
+          "minutesSinceDeploy": 1,
+          "author": "sarah.connor@enterprise.com",
+          "commit": {
+            "hash": "8a21f4c",
+            "branch": "main",
+            "message": "fix: update stripe checkout session timeout handling",
+            "diff": "--- a/src/checkout.js\n+++ b/src/checkout.js\n@@ -34,3 +34,4 @@\n-  const timeout = 5000;\n+  const timeout = 8000;\n+  session.setTimeout(timeout);"
+          },
+          "previousStableRevision": {
+            "id": "order-checkout-service-00001-v100",
+            "version": "1.0.0",
+            "image": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+            "deployedAt": "2026-10-10T09:15:00.000Z",
+            "author": "sarah.connor@enterprise.com"
+          }
+        },
+        "cloudMonitoring": {
+          "errorRatePercent": 0,
+          "p50LatencyMs": 41,
+          "p95LatencyMs": 53,
+          "p99LatencyMs": 54,
+          "totalRequestsInWindow": 50,
+          "metricThresholdCondition": "run.googleapis.com/request_count with response_code_class >= 500 > 5%"
+        },
+        "correlation": {
+          "temporalMatch": true,
+          "summary": "Error spike (0%) appeared immediately following deployment of revision order-checkout-service-00001-v100 (commit 8a21f4c) by sarah.connor@enterprise.com."
+        }
+      },
+      "diagnosis": {
+        "likelyCause": "Cloud Run service citizen-certificate-portal experienced an unhandled 5xx error surge (0%) following deployment order-checkout-service-00001-v100.",
+        "confidence": "HIGH (96%)",
+        "confidenceScore": 96,
+        "supportingEvidence": [
+          "ALERT: Peak-time deadline traffic surge injected. Database pool saturation threshold exceeded (20/20 active connections).",
+          "Temporal correlation: Inflection point matches deployment timestamp 2026-10-10T09:15:00.000Z."
+        ],
+        "nextSteps": [
+          "Step 1: Inspect active container instances in Cloud Run console.",
+          "Step 2: Revert traffic to known good revision.",
+          "Step 3: Review application error logs in Cloud Logging."
+        ],
+        "rollbackPlan": {
+          "recommended": true,
+          "targetRevision": "order-checkout-service-00001-v100"
+        },
+        "aiModel": "Gemini on Vertex AI (gemini-3.8-flash)",
+        "analyzedAt": "2026-10-10T05:48:07.928Z"
+      },
+      "resolutionNotes": "Mitigated in 4s via rollback to order-checkout-service-00001-v100 by Alex Chen (On-Call Lead)",
+      "resolvedAt": "2026-10-10T05:48:13.681Z",
+      "timeToMitigateSeconds": 6
     }
   ],
   "auditLogs": [
+    {
+      "id": "AUDIT-293657",
+      "timestamp": "2026-10-10T05:48:13.657Z",
+      "incidentId": "INC-928322",
+      "approvedBy": "Alex Chen (On-Call Lead)",
+      "action": "EXECUTE_ROLLBACK",
+      "details": {
+        "targetRevision": "order-checkout-service-00001-v100",
+        "reason": "Confirmed null pointer in taxEngine.js v1.1.0 diff via Gemini diagnosis.",
+        "approvedAt": "2026-10-10T05:48:13.657Z"
+      }
+    },
+    {
+      "id": "AUDIT-291510",
+      "timestamp": "2026-10-10T05:48:11.510Z",
+      "incidentId": "INC-928322",
+      "approvedBy": "Alex Chen (On-Call Lead)",
+      "action": "EXECUTE_ROLLBACK",
+      "details": {
+        "targetRevision": "order-checkout-service-00001-v100",
+        "reason": "Confirmed null pointer in taxEngine.js v1.1.0 diff via Gemini diagnosis.",
+        "approvedAt": "2026-10-10T05:48:11.509Z"
+      }
+    },
+    {
+      "id": "AUDIT-232181",
+      "timestamp": "2026-10-10T05:47:12.181Z",
+      "incidentId": "INC-480488",
+      "approvedBy": "Alex Chen (On-Call Lead)",
+      "action": "EXECUTE_ROLLBACK",
+      "details": {
+        "targetRevision": "order-checkout-service-00001-v100",
+        "reason": "Confirmed null pointer in taxEngine.js v1.1.0 diff via Gemini diagnosis.",
+        "approvedAt": "2026-10-10T05:47:12.181Z"
+      }
+    },
+    {
+      "id": "AUDIT-231169",
+      "timestamp": "2026-10-10T05:47:11.169Z",
+      "incidentId": "INC-480488",
+      "approvedBy": "Alex Chen (On-Call Lead)",
+      "action": "EXECUTE_ROLLBACK",
+      "details": {
+        "targetRevision": "order-checkout-service-00001-v100",
+        "reason": "Confirmed null pointer in taxEngine.js v1.1.0 diff via Gemini diagnosis.",
+        "approvedAt": "2026-10-10T05:47:11.169Z"
+      }
+    },
+    {
+      "id": "AUDIT-230175",
+      "timestamp": "2026-10-10T05:47:10.175Z",
+      "incidentId": "INC-480488",
+      "approvedBy": "Alex Chen (On-Call Lead)",
+      "action": "EXECUTE_ROLLBACK",
+      "details": {
+        "targetRevision": "order-checkout-service-00001-v100",
+        "reason": "Confirmed null pointer in taxEngine.js v1.1.0 diff via Gemini diagnosis.",
+        "approvedAt": "2026-10-10T05:47:10.175Z"
+      }
+    },
     {
       "id": "AUDIT-957182",
       "timestamp": "2026-10-10T05:42:37.182Z",
@@ -2959,5 +5482,5 @@
       }
     }
   ],
-  "updatedAt": "2026-10-10T05:42:38.728Z"
+  "updatedAt": "2026-10-10T05:48:13.683Z"
 }
