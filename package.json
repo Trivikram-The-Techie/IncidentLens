@@ -1,0 +1,19 @@
+{
+  "name": "incident-lens",
+  "version": "1.0.0",
+  "description": "IncidentLens: AI on-call copilot for automated incident diagnosis and rollback approval",
+  "type": "module",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node server/index.js",
+    "demo": "node demo/run-demo.js",
+    "test": "node demo/run-demo.js"
+  },
+  "dependencies": {
+    "@google/genai": "^2.28.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  }
+}

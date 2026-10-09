@@ -1,0 +1,41 @@
+{
+  "serviceName": "order-checkout-service",
+  "project": "incidentlens-prod-gcp",
+  "region": "us-central1",
+  "revisions": [
+    {
+      "id": "order-checkout-service-00001-v100",
+      "version": "1.0.0",
+      "image": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+      "deployedAt": "2026-10-10T09:15:00.000Z",
+      "author": "sarah.connor@enterprise.com",
+      "commit": {
+        "hash": "8a21f4c",
+        "branch": "main",
+        "message": "fix: update stripe checkout session timeout handling",
+        "diff": "--- a/src/checkout.js\n+++ b/src/checkout.js\n@@ -34,3 +34,4 @@\n-  const timeout = 5000;\n+  const timeout = 8000;\n+  session.setTimeout(timeout);"
+      },
+      "status": "HEALTHY",
+      "active": false,
+      "trafficPercent": 0,
+      "notes": "Stable production revision. 0.02% baseline error rate."
+    },
+    {
+      "id": "order-checkout-service-00002-v110",
+      "version": "1.1.0",
+      "image": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.1.0",
+      "deployedAt": "2026-10-10T09:44:12.000Z",
+      "author": "alex.chen@enterprise.com",
+      "commit": {
+        "hash": "4f9a2b8",
+        "branch": "main",
+        "message": "feat(tax): optimize regional tax calculation with new tax engine v2",
+        "diff": "--- a/src/taxEngine.js\n+++ b/src/taxEngine.js\n@@ -52,6 +52,11 @@ function calculateRegionalTax(order, user) {\n+  // BUG: Guest checkouts do not have taxProfile object!\n+  // Throws: TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n+  const rate = user.taxProfile.calculateRegional(order.shippingCountry);\n+  return order.subtotal * rate;\n }\n"
+      },
+      "status": "ACTIVE_CRASHING",
+      "active": true,
+      "trafficPercent": 100,
+      "notes": "Introduced null pointer dereference on user.taxProfile for guest checkout requests."
+    }
+  ]
+}

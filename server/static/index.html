@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IncidentLens | AI On-Call Copilot</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="dark-theme">
+  <!-- Top Navigation Bar -->
+  <header class="top-nav">
+    <div class="nav-left">
+      <div class="logo-group">
+        <div class="lens-icon">
+          <span class="lens-spark">✦</span>
+          <span class="lens-core">🔍</span>
+        </div>
+        <div>
+          <div class="brand-title">IncidentLens</div>
+          <div class="brand-subtitle">AI On-Call Copilot for Google Cloud & Cloud Run</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-center">
+      <div class="oncall-badge" id="oncallBadge">
+        <span class="status-dot green"></span>
+        <span>ON-CALL: <strong>Alex Chen</strong> (3:14 AM Local)</span>
+      </div>
+      <div class="service-pill" id="servicePill">
+        <span class="pill-label">SERVICE:</span>
+        <span class="pill-value font-mono">order-checkout-service</span>
+        <span class="rev-tag rev-good font-mono" id="activeRevTag">v1.0.0 (Healthy)</span>
+      </div>
+    </div>
+
+    <div class="nav-right">
+      <button class="btn btn-secondary btn-sm" id="btnSettings" title="API Keys & Webhooks">
+        ⚙️ Settings
+      </button>
+      <div class="sse-status" id="sseIndicator" title="Live stream status">
+        <span class="dot pulse"></span> Live Sync
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Cockpit Layout -->
+  <main class="cockpit-container">
+    <!-- Action Controls / Chaos Injection Bar -->
+    <section class="chaos-banner">
+      <div class="banner-content">
+        <div class="banner-title-area">
+          <div class="pill-alert">3 AM SCENARIO DEMO</div>
+          <h2>Interactive Outage & 30-Second Diagnosis Simulator</h2>
+          <p>Deliberately break the microservice by deploying <strong>v1.1.0</strong> (introducing a null pointer exception in regional tax calculation) and watch IncidentLens harvest logs, pinpoint the commit, and post runbook rollback to Slack in ~30s.</p>
+        </div>
+
+        <div class="banner-actions">
+          <button class="btn btn-danger btn-lg pulse-hover" id="btnBreakApp">
+            <span class="icon">🚨</span>
+            <span class="btn-text">
+              <strong>1. Break App & Fire Alert</strong>
+              <small>Deploys v1.1.0 + Spikes Errors</small>
+            </span>
+          </button>
+
+          <button class="btn btn-primary btn-lg" id="btnRun30sDemo">
+            <span class="icon">⚡</span>
+            <span class="btn-text">
+              <strong>Run Full 30s Demo</strong>
+              <small>Auto-Break + Diagnose + Rollback</small>
+            </span>
+          </button>
+
+          <button class="btn btn-outline btn-lg" id="btnHealApp">
+            <span class="icon">🛡️</span>
+            <span class="btn-text">
+              <strong>Quick Restore</strong>
+              <small>Revert to v1.0.0</small>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Live 30s Pipeline Visualizer HUD -->
+      <div class="pipeline-hud" id="pipelineHud">
+        <div class="pipeline-timer font-mono">
+          <span class="timer-label">TIMELINE:</span>
+          <span class="timer-val" id="hudTimer">00:00.0</span>
+        </div>
+
+        <div class="pipeline-steps">
+          <div class="step-card" id="stepAlert">
+            <div class="step-num">1</div>
+            <div class="step-info">
+              <div class="step-name">Cloud Monitoring Alert</div>
+              <div class="step-detail">Pub/Sub push ingested</div>
+            </div>
+            <div class="step-status">IDLE</div>
+          </div>
+
+          <div class="step-connector"></div>
+
+          <div class="step-card" id="stepEvidence">
+            <div class="step-num">2</div>
+            <div class="step-info">
+              <div class="step-name">Harvest Evidence</div>
+              <div class="step-detail">Cloud Logging + Diff + Metrics</div>
+            </div>
+            <div class="step-status">IDLE</div>
+          </div>
+
+          <div class="step-connector"></div>
+
+          <div class="step-card" id="stepGemini">
+            <div class="step-num">3</div>
+            <div class="step-info">
+              <div class="step-name">Gemini on Vertex AI</div>
+              <div class="step-detail">Root cause hypothesis & runbook</div>
+            </div>
+            <div class="step-status">IDLE</div>
+          </div>
+
+          <div class="step-connector"></div>
+
+          <div class="step-card" id="stepSlack">
+            <div class="step-num">4</div>
+            <div class="step-info">
+              <div class="step-name">Slack Notification</div>
+              <div class="step-detail">Interactive Block Kit card</div>
+            </div>
+            <div class="step-status">IDLE</div>
+          </div>
+
+          <div class="step-connector"></div>
+
+          <div class="step-card" id="stepRollback">
+            <div class="step-num">5</div>
+            <div class="step-info">
+              <div class="step-name">Human Rollback Approval</div>
+              <div class="step-detail">Cloud Run traffic reverted</div>
+            </div>
+            <div class="step-status">IDLE</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Two-Column Workspace: Metrics/Evidence vs Slack Simulator -->
+    <div class="workspace-grid">
+      <!-- Left Column: Metrics & Live Evidence -->
+      <div class="workspace-col left-col">
+        <!-- Live Metrics Cards -->
+        <div class="metrics-grid">
+          <div class="metric-card" id="cardErrorRate">
+            <div class="metric-header">
+              <span class="metric-title">Error Rate (5xx)</span>
+              <span class="metric-badge badge-green" id="badgeErrorRate">0.0% Normal</span>
+            </div>
+            <div class="metric-value font-mono" id="metricErrorRate">0.0%</div>
+            <div class="metric-sub font-mono">Alert Threshold: > 5.0%</div>
+            <div class="metric-bar-bg">
+              <div class="metric-bar-fill" id="barErrorRate" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-title">p99 Latency</span>
+              <span class="metric-badge badge-neutral" id="badgeLatency">Normal</span>
+            </div>
+            <div class="metric-value font-mono" id="metricLatency">42 ms</div>
+            <div class="metric-sub font-mono">SLA Target: &lt; 250ms</div>
+            <div class="metric-bar-bg">
+              <div class="metric-bar-fill latency-bar" id="barLatency" style="width: 15%"></div>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-title">Active Cloud Run Revision</span>
+              <span class="metric-badge badge-blue">100% Traffic</span>
+            </div>
+            <div class="metric-value font-mono text-sm" id="metricRevisionId">order-checkout-service-00001-v100</div>
+            <div class="metric-sub" id="metricRevisionAuthor">Author: sarah.connor | Image: v1.0.0</div>
+          </div>
+        </div>
+
+        <!-- Evidence & Diagnosis Panel -->
+        <div class="panel-card evidence-panel">
+          <div class="panel-header">
+            <div class="panel-title-group">
+              <h3>🔍 Auto-Gathered Incident Evidence</h3>
+              <span class="badge badge-purple" id="incidentIdBadge">INC-READY</span>
+            </div>
+            <div class="panel-tabs">
+              <button class="tab-btn active" data-tab="tab-diagnosis">AI Diagnosis</button>
+              <button class="tab-btn" data-tab="tab-logs">Cloud Logging</button>
+              <button class="tab-btn" data-tab="tab-diff">Cloud Build Diff</button>
+              <button class="tab-btn" data-tab="tab-timeline">Firestore Timeline</button>
+              <button class="tab-btn" data-tab="tab-postmortem">Post-Mortem</button>
+            </div>
+          </div>
+
+          <div class="panel-body">
+            <!-- Tab: AI Diagnosis -->
+            <div class="tab-content active" id="tab-diagnosis">
+              <div class="diagnosis-card" id="diagnosisCard">
+                <div class="diagnosis-empty" id="diagnosisEmpty">
+                  <div class="empty-icon">🤖</div>
+                  <h4>No Active Incident Diagnosis</h4>
+                  <p>Click <strong>"Break App & Fire Alert"</strong> above to trigger Cloud Monitoring and see Gemini 3.8 Flash synthesize logs, diffs, and metrics in seconds.</p>
+                </div>
+
+                <div class="diagnosis-populated hidden" id="diagnosisPopulated">
+                  <div class="diag-header-row">
+                    <span class="diag-sev-badge sev-1 font-mono" id="diagSev">SEV-1</span>
+                    <div class="diag-headline" id="diagHeadline">Null pointer in tax calculation in commit 4f9a2b8</div>
+                    <span class="diag-conf-badge font-mono" id="diagConfidence">Confidence: 98%</span>
+                  </div>
+
+                  <div class="diag-section">
+                    <div class="section-title">🧠 ROOT-CAUSE HYPOTHESIS</div>
+                    <div class="hypothesis-text" id="diagHypothesis">--</div>
+                  </div>
+
+                  <div class="diag-suspect-box">
+                    <div class="suspect-header">
+                      <span>🎯 PRIMARY SUSPECT COMMIT</span>
+                      <span class="font-mono text-xs" id="diagSuspectHash">4f9a2b8</span>
+                    </div>
+                    <div class="suspect-body">
+                      <div><strong>Author:</strong> <span id="diagSuspectAuthor">alex.chen@enterprise.com</span></div>
+                      <div><strong>Message:</strong> <span id="diagSuspectMsg">feat(tax): optimize regional tax calculation with new tax engine v2</span></div>
+                      <div class="bug-desc" id="diagBugDesc">Guest checkouts lack user.taxProfile, throwing TypeError.</div>
+                    </div>
+                  </div>
+
+                  <div class="diag-section">
+                    <div class="section-title">📋 RECOMMENDED RUNBOOK MITIGATION</div>
+                    <ol class="runbook-list" id="diagRunbook">
+                      <li>Approve immediate 1-click rollback to revision order-checkout-service-00001-v100.</li>
+                      <li>Verify error rate drops to &lt; 0.1%.</li>
+                    </ol>
+                  </div>
+
+                  <div class="diag-footer">
+                    <span class="ai-source-tag" id="diagAiModel">Gemini 3.8 Flash on Vertex AI</span>
+                    <span class="diag-time font-mono" id="diagTime">--</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab: Cloud Logging -->
+            <div class="tab-content" id="tab-logs">
+              <div class="logs-container font-mono" id="logsContainer">
+                <div class="log-entry log-info">[INFO] Service listening on port 8080. Baseline health OK.</div>
+              </div>
+            </div>
+
+            <!-- Tab: Cloud Build Diff -->
+            <div class="tab-content" id="tab-diff">
+              <div class="diff-header font-mono">
+                <div>Commit: <strong id="diffCommitHash">4f9a2b8</strong> by <span id="diffAuthor">alex.chen@enterprise.com</span></div>
+                <div class="diff-file">src/taxEngine.js</div>
+              </div>
+              <pre class="diff-view font-mono" id="diffContent"><code>// Git Diff for Bad Deployment v1.1.0
+--- a/src/taxEngine.js
++++ b/src/taxEngine.js
+@@ -52,6 +52,11 @@ function calculateRegionalTax(order, user) {
++  // BUG: Guest checkouts do not have taxProfile object!
++  // Throws: TypeError: Cannot read properties of undefined (reading 'calculateRegional')
++  const rate = user.taxProfile.calculateRegional(order.shippingCountry);
++  return order.subtotal * rate;
+ }</code></pre>
+            </div>
+
+            <!-- Tab: Firestore Timeline -->
+            <div class="tab-content" id="tab-timeline">
+              <div class="timeline-feed" id="timelineFeed">
+                <div class="timeline-item">
+                  <div class="t-dot"></div>
+                  <div class="t-body">
+                    <div class="t-time font-mono">03:14:00 AM</div>
+                    <div class="t-text">Cloud Monitoring baseline operational.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab: Post-Mortem -->
+            <div class="tab-content" id="tab-postmortem">
+              <div class="postmortem-box font-mono" id="postmortemBox">
+                Click "Generate Post-Mortem" after incident resolution to view automated SRE report.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Interactive Slack On-Call Channel Simulator -->
+      <div class="workspace-col right-col">
+        <div class="slack-window">
+          <!-- Slack Workspace Chrome -->
+          <div class="slack-topbar">
+            <div class="slack-breadcrumbs">
+              <span class="slack-hash">#</span>
+              <span class="slack-chan-name">incidents-oncall</span>
+              <span class="slack-topic">| Production Cloud Run Alert Ingestion & Automated AI Copilot</span>
+            </div>
+            <div class="slack-members font-mono">👥 48 members</div>
+          </div>
+
+          <!-- Slack Message Feed -->
+          <div class="slack-feed" id="slackFeed">
+            <!-- Initial Welcome Message -->
+            <div class="slack-msg-group">
+              <div class="slack-avatar bot-avatar">🤖</div>
+              <div class="slack-msg-body">
+                <div class="slack-sender font-mono">
+                  <strong>IncidentLens Copilot</strong> <span class="app-badge">APP</span> <span class="msg-ts">03:00 AM</span>
+                </div>
+                <div class="slack-text">
+                  IncidentLens is actively monitoring Cloud Run services. Any alert will automatically gather Cloud Logging, Cloud Build commits, and Cloud Monitoring metrics, summarize with Gemini 3.8 Flash, and deliver actionable rollback cards here.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slack Quick Simulation Controls -->
+          <div class="slack-composer">
+            <div class="composer-hint">
+              💡 Interactive Slack Block Kit: click buttons below to approve rollbacks as an SRE engineer.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Human Approval Confirmation Modal -->
+  <div class="modal-overlay hidden" id="approvalModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span class="modal-icon">⚠️</span>
+        <h3>Human Authorization Required</h3>
+      </div>
+      <div class="modal-body">
+        <p>You are about to execute an automated Cloud Run rollback for incident <strong id="modalIncidentId">INC-123456</strong>.</p>
+        <div class="modal-details">
+          <div><strong>Target Revision:</strong> <span class="font-mono text-xs" id="modalTargetRev">order-checkout-service-00001-v100</span></div>
+          <div><strong>Target Version:</strong> <span class="font-mono" id="modalTargetVer">1.0.0 (Known Good)</span></div>
+          <div><strong>Action:</strong> Instant 100% traffic migration</div>
+        </div>
+        <div class="form-group">
+          <label>Approver Name / SRE Signature:</label>
+          <input type="text" id="inputApprover" class="form-control" value="Alex Chen (On-Call Lead)" />
+        </div>
+        <div class="form-group">
+          <label>Reason / Audit Log Note:</label>
+          <input type="text" id="inputReason" class="form-control" value="Confirmed null pointer in taxEngine.js v1.1.0 diff via Gemini diagnosis." />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="btnCancelApproval">Cancel</button>
+        <button class="btn btn-danger" id="btnConfirmRollback">
+          ⚡ Authorize & Execute Rollback
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay hidden" id="settingsModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span class="modal-icon">⚙️</span>
+        <h3>IncidentLens Configuration</h3>
+      </div>
+      <div class="modal-body">
+        <p>IncidentLens runs out-of-the-box with a built-in SRE diagnostic engine. Enter live credentials below if you wish to run live Google Cloud queries or post to a real Slack workspace.</p>
+        <div class="form-group">
+          <label>Gemini API Key (Google GenAI / Vertex AI):</label>
+          <input type="password" id="inputGeminiKey" class="form-control" placeholder="AIzaSy... (Leave empty to use autonomous engine)" />
+          <small>Uses <code>gemini-3.8-flash</code> via the official <code>@google/genai</code> SDK.</small>
+        </div>
+        <div class="form-group">
+          <label>Slack Incoming Webhook URL (Optional):</label>
+          <input type="text" id="inputSlackUrl" class="form-control" placeholder="https://hooks.slack.com/services/..." />
+          <small>Optional. If omitted, messages render in the interactive Slack simulator on the right.</small>
+        </div>
+        <div class="form-group">
+          <label>Google Cloud Project ID:</label>
+          <input type="text" id="inputGcpProject" class="form-control" value="incidentlens-prod-gcp" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="btnCloseSettings">Close</button>
+        <button class="btn btn-primary" id="btnSaveSettings">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

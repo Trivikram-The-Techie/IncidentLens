@@ -1,0 +1,728 @@
+{
+  "incidents": [
+    {
+      "id": "INC-971968",
+      "service": "order-checkout-service",
+      "title": "Elevated 5xx Errors on order-checkout-service",
+      "severity": "SEV-1",
+      "status": "RESOLVED",
+      "alertPayload": {
+        "incident_id": "971968",
+        "condition_name": "Cloud Run service error rate > 5% for 1m",
+        "policy_name": "Production 5xx Error Spike Alert Policy",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "service_name": "order-checkout-service",
+            "project_id": "incidentlens-prod-gcp",
+            "location": "us-central1"
+          }
+        },
+        "summary": "Cloud Run service order-checkout-service has an error rate of 88.5%, violating policy threshold (5.0%).",
+        "started_at": 1791606709,
+        "state": "open"
+      },
+      "createdAt": "2026-10-10T04:32:49.776Z",
+      "timeline": [
+        {
+          "timestamp": "2026-10-10T04:32:49.776Z",
+          "type": "ALERT_INGESTED",
+          "description": "Alert ingested from Cloud Monitoring Pub/Sub: Cloud Run service error rate > 5% for 1m"
+        },
+        {
+          "timestamp": "2026-10-10T04:32:49.778Z",
+          "type": "EVIDENCE_GATHERED",
+          "description": "Harvested 14 error logs, recent deploy order-checkout-service-00002-v110, and telemetry metrics.",
+          "metadata": {}
+        },
+        {
+          "timestamp": "2026-10-10T04:32:49.786Z",
+          "type": "DIAGNOSIS_COMPLETE",
+          "description": "Gemini root cause hypothesis generated with 98% confidence. Suspected commit: 4f9a2b8.",
+          "metadata": {}
+        },
+        {
+          "timestamp": "2026-10-10T04:32:58.331Z",
+          "type": "ROLLBACK_APPROVED",
+          "description": "Rollback authorized by Alex Chen (On-Call Lead). Migrating Cloud Run traffic to order-checkout-service-00001-v100.",
+          "metadata": {
+            "approvedBy": "Alex Chen (On-Call Lead)",
+            "targetRevisionId": "order-checkout-service-00001-v100"
+          }
+        },
+        {
+          "timestamp": "2026-10-10T04:32:58.332Z",
+          "type": "INCIDENT_RESOLVED",
+          "description": "Traffic successfully reverted to order-checkout-service-00001-v100. Verification probes passed 10/10. Error rate: 48.3%.",
+          "metadata": {
+            "incidentId": "INC-971968",
+            "success": true,
+            "targetRevision": "order-checkout-service-00001-v100",
+            "restoredVersion": "1.0.0",
+            "executedAt": "2026-10-10T04:32:58.331Z",
+            "probesPassed": 10,
+            "probesTotal": 10,
+            "postRollbackMetrics": {
+              "totalRequests": 29,
+              "errorCount": 14,
+              "errorRate": 48.3,
+              "p50LatencyMs": 54,
+              "p95LatencyMs": 3820,
+              "p99LatencyMs": 3994,
+              "activeRevision": {
+                "id": "order-checkout-service-00001-v100",
+                "version": "1.0.0",
+                "image": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+                "deployedAt": "2026-10-10T09:15:00.000Z",
+                "author": "sarah.connor@enterprise.com",
+                "commit": {
+                  "hash": "8a21f4c",
+                  "branch": "main",
+                  "message": "fix: update stripe checkout session timeout handling",
+                  "diff": "--- a/src/checkout.js\n+++ b/src/checkout.js\n@@ -34,3 +34,4 @@\n-  const timeout = 5000;\n+  const timeout = 8000;\n+  session.setTimeout(timeout);"
+                },
+                "status": "HEALTHY",
+                "active": true,
+                "trafficPercent": 100,
+                "notes": "Stable production revision. 0.02% baseline error rate."
+              }
+            }
+          }
+        }
+      ],
+      "updatedAt": "2026-10-10T04:32:58.332Z",
+      "evidence": {
+        "serviceName": "order-checkout-service",
+        "gatheredAt": "2026-10-10T04:32:49.777Z",
+        "collectionDurationMs": 0,
+        "cloudLogging": {
+          "totalLogsEvaluated": 23,
+          "errorCount": 14,
+          "uniqueErrorSignatures": [
+            {
+              "signature": "CRITICAL: Unhandled exception during checkout processing for order ORD-445313: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "count": 1,
+              "sampleTimestamp": "2026-10-10T04:32:49.776Z",
+              "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+              "httpStatus": 500
+            },
+            {
+              "signature": "CRITICAL: Unhandled exception during checkout processing for order ORD-619357: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "count": 1,
+              "sampleTimestamp": "2026-10-10T04:32:49.776Z",
+              "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+              "httpStatus": 500
+            },
+            {
+              "signature": "CRITICAL: Unhandled exception during checkout processing for order ORD-124576: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "count": 1,
+              "sampleTimestamp": "2026-10-10T04:32:49.776Z",
+              "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+              "httpStatus": 500
+            },
+            {
+              "signature": "CRITICAL: Unhandled exception during checkout processing for order ORD-954763: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "count": 1,
+              "sampleTimestamp": "2026-10-10T04:32:49.776Z",
+              "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+              "httpStatus": 500
+            },
+            {
+              "signature": "CRITICAL: Unhandled exception during checkout processing for order ORD-856283: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "count": 1,
+              "sampleTimestamp": "2026-10-10T04:32:49.776Z",
+              "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+              "httpStatus": 500
+            },
+            {
+              "signature": "CRITICAL: Unhandled exception during checkout processing for order ORD-279157: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "count": 1,
+              "sampleTimestamp": "2026-10-10T04:32:49.776Z",
+              "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+              "httpStatus": 500
+            },
+            {
+              "signature": "CRITICAL: Unhandled exception during checkout processing for order ORD-452743: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "count": 1,
+              "sampleTimestamp": "2026-10-10T04:32:47.255Z",
+              "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+              "httpStatus": 500
+            },
+            {
+              "signature": "CRITICAL: Unhandled exception during checkout processing for order ORD-388570: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "count": 1,
+              "sampleTimestamp": "2026-10-10T04:32:47.255Z",
+              "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+              "httpStatus": 500
+            },
+            {
+              "signature": "CRITICAL: Unhandled exception during checkout processing for order ORD-360273: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "count": 1,
+              "sampleTimestamp": "2026-10-10T04:32:47.254Z",
+              "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+              "httpStatus": 500
+            },
+            {
+              "signature": "CRITICAL: Unhandled exception during checkout processing for order ORD-295684: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "count": 1,
+              "sampleTimestamp": "2026-10-10T04:32:47.254Z",
+              "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+              "httpStatus": 500
+            },
+            {
+              "signature": "CRITICAL: Unhandled exception during checkout processing for order ORD-870612: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "count": 1,
+              "sampleTimestamp": "2026-10-10T04:32:47.254Z",
+              "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+              "httpStatus": 500
+            },
+            {
+              "signature": "CRITICAL: Unhandled exception during checkout processing for order ORD-558408: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "count": 1,
+              "sampleTimestamp": "2026-10-10T04:32:47.254Z",
+              "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+              "httpStatus": 500
+            },
+            {
+              "signature": "CRITICAL: Unhandled exception during checkout processing for order ORD-544840: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "count": 1,
+              "sampleTimestamp": "2026-10-10T04:32:47.254Z",
+              "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+              "httpStatus": 500
+            },
+            {
+              "signature": "CRITICAL: Unhandled exception during checkout processing for order ORD-224577: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "count": 1,
+              "sampleTimestamp": "2026-10-10T04:32:47.254Z",
+              "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+              "httpStatus": 500
+            }
+          ],
+          "recentErrorSamples": [
+            {
+              "timestamp": "2026-10-10T04:32:49.776Z",
+              "severity": "ERROR",
+              "message": "CRITICAL: Unhandled exception during checkout processing for order ORD-445313: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "service": "order-checkout-service",
+              "revision": "order-checkout-service-00002-v110",
+              "metadata": {
+                "traceId": "projects/incidentlens-prod-gcp/traces/iojw37h1a",
+                "orderId": "ORD-445313",
+                "isGuest": true,
+                "amount": 89,
+                "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+                "httpStatus": 500,
+                "commit": "4f9a2b8"
+              }
+            },
+            {
+              "timestamp": "2026-10-10T04:32:49.776Z",
+              "severity": "ERROR",
+              "message": "CRITICAL: Unhandled exception during checkout processing for order ORD-619357: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "service": "order-checkout-service",
+              "revision": "order-checkout-service-00002-v110",
+              "metadata": {
+                "traceId": "projects/incidentlens-prod-gcp/traces/5llrfjm3o2",
+                "orderId": "ORD-619357",
+                "isGuest": true,
+                "amount": 89,
+                "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+                "httpStatus": 500,
+                "commit": "4f9a2b8"
+              }
+            },
+            {
+              "timestamp": "2026-10-10T04:32:49.776Z",
+              "severity": "ERROR",
+              "message": "CRITICAL: Unhandled exception during checkout processing for order ORD-124576: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "service": "order-checkout-service",
+              "revision": "order-checkout-service-00002-v110",
+              "metadata": {
+                "traceId": "projects/incidentlens-prod-gcp/traces/dpfaurx06k",
+                "orderId": "ORD-124576",
+                "isGuest": true,
+                "amount": 89,
+                "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+                "httpStatus": 500,
+                "commit": "4f9a2b8"
+              }
+            },
+            {
+              "timestamp": "2026-10-10T04:32:49.776Z",
+              "severity": "ERROR",
+              "message": "CRITICAL: Unhandled exception during checkout processing for order ORD-954763: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "service": "order-checkout-service",
+              "revision": "order-checkout-service-00002-v110",
+              "metadata": {
+                "traceId": "projects/incidentlens-prod-gcp/traces/0w1j8uf5ak",
+                "orderId": "ORD-954763",
+                "isGuest": true,
+                "amount": 89,
+                "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+                "httpStatus": 500,
+                "commit": "4f9a2b8"
+              }
+            },
+            {
+              "timestamp": "2026-10-10T04:32:49.776Z",
+              "severity": "ERROR",
+              "message": "CRITICAL: Unhandled exception during checkout processing for order ORD-856283: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "service": "order-checkout-service",
+              "revision": "order-checkout-service-00002-v110",
+              "metadata": {
+                "traceId": "projects/incidentlens-prod-gcp/traces/4hglsfqvt2",
+                "orderId": "ORD-856283",
+                "isGuest": true,
+                "amount": 89,
+                "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+                "httpStatus": 500,
+                "commit": "4f9a2b8"
+              }
+            }
+          ]
+        },
+        "cloudDeploy": {
+          "activeRevisionId": "order-checkout-service-00002-v110",
+          "activeVersion": "1.1.0",
+          "activeImage": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.1.0",
+          "deployedAt": "2026-10-10T09:44:12.000Z",
+          "minutesSinceDeploy": 1,
+          "author": "alex.chen@enterprise.com",
+          "commit": {
+            "hash": "4f9a2b8",
+            "branch": "main",
+            "message": "feat(tax): optimize regional tax calculation with new tax engine v2",
+            "diff": "--- a/src/taxEngine.js\n+++ b/src/taxEngine.js\n@@ -52,6 +52,11 @@ function calculateRegionalTax(order, user) {\n+  // BUG: Guest checkouts do not have taxProfile object!\n+  // Throws: TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n+  const rate = user.taxProfile.calculateRegional(order.shippingCountry);\n+  return order.subtotal * rate;\n }\n"
+          },
+          "previousStableRevision": {
+            "id": "order-checkout-service-00001-v100",
+            "version": "1.0.0",
+            "image": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+            "deployedAt": "2026-10-10T09:15:00.000Z",
+            "author": "sarah.connor@enterprise.com"
+          }
+        },
+        "cloudMonitoring": {
+          "errorRatePercent": 73.7,
+          "p50LatencyMs": 2646,
+          "p95LatencyMs": 3994,
+          "p99LatencyMs": 3994,
+          "totalRequestsInWindow": 19,
+          "metricThresholdCondition": "run.googleapis.com/request_count with response_code_class >= 500 > 5%"
+        },
+        "correlation": {
+          "temporalMatch": true,
+          "summary": "Error spike (73.7%) appeared immediately following deployment of revision order-checkout-service-00002-v110 (commit 4f9a2b8) by alex.chen@enterprise.com."
+        }
+      },
+      "diagnosis": {
+        "incidentHeadline": "Null pointer dereference in tax calculation introduced in commit 4f9a2b8 by alex.chen@enterprise.com",
+        "severity": "SEV-1",
+        "confidenceScore": 98,
+        "rootCauseHypothesis": "Commit 4f9a2b8 introduced a call to 'user.taxProfile.calculateRegional()' without checking if 'user.taxProfile' exists. For guest checkout requests, user.taxProfile is undefined, throwing an unhandled TypeError that crashes checkout transactions with HTTP 500.",
+        "primarySuspect": {
+          "commitHash": "4f9a2b8",
+          "author": "alex.chen@enterprise.com",
+          "message": "feat(tax): optimize regional tax calculation with new tax engine v2",
+          "bugExplanation": "Guest checkouts lack user.taxProfile, causing TypeError: Cannot read properties of undefined (reading 'calculateRegional') at calculateRegionalTax() in taxEngine.js:54."
+        },
+        "evidenceCorrelation": "Deployment occurred 1m ago. The error rate spiked from baseline (<0.1%) to 73.7% immediately following traffic shift to order-checkout-service-00002-v110.",
+        "runbookSteps": [
+          "Approve immediate 1-click traffic rollback to previous stable revision order-checkout-service-00001-v100 (v1.0.0).",
+          "Verify Cloud Monitoring error rate drops back to <0.1% within 60 seconds.",
+          "Notify on-call team in Slack channel #incidents-oncall of mitigation status.",
+          "Revert commit 4f9a2b8 on main branch and open high-priority fix ticket for alex.chen@enterprise.com."
+        ],
+        "rollbackPlan": {
+          "recommended": true,
+          "targetRevision": "order-checkout-service-00001-v100",
+          "targetVersion": "1.0.0",
+          "estimatedRecoveryTime": "< 30 seconds",
+          "requiresHumanApproval": true
+        },
+        "aiModel": "gemini-3.8-flash (IncidentLens Engine - Provide GEMINI_API_KEY in settings to run live Google Cloud queries)",
+        "analyzedAt": "2026-10-10T04:32:49.786Z"
+      },
+      "slackMessageId": "SLACK_MSG_1791606769792",
+      "resolutionNotes": "Mitigated in 28s via rollback to order-checkout-service-00001-v100 by Alex Chen (On-Call Lead)",
+      "resolvedAt": "2026-10-10T04:32:58.331Z",
+      "timeToMitigateSeconds": 9
+    },
+    {
+      "id": "INC-894438",
+      "service": "order-checkout-service",
+      "title": "Elevated 5xx Errors on order-checkout-service",
+      "severity": "SEV-1",
+      "status": "RESOLVED",
+      "alertPayload": {
+        "incident_id": "894438",
+        "condition_name": "Cloud Run service error rate > 5% for 1m",
+        "policy_name": "Production 5xx Error Spike Alert Policy",
+        "resource": {
+          "type": "cloud_run_revision",
+          "labels": {
+            "service_name": "order-checkout-service",
+            "project_id": "incidentlens-prod-gcp",
+            "location": "us-central1"
+          }
+        },
+        "summary": "Cloud Run service order-checkout-service has an error rate of 88.5%, violating policy threshold (5.0%).",
+        "started_at": 1791606842,
+        "state": "open"
+      },
+      "createdAt": "2026-10-10T04:35:02.642Z",
+      "timeline": [
+        {
+          "timestamp": "2026-10-10T04:35:02.642Z",
+          "type": "ALERT_INGESTED",
+          "description": "Alert ingested from Cloud Monitoring Pub/Sub: Cloud Run service error rate > 5% for 1m"
+        },
+        {
+          "timestamp": "2026-10-10T04:35:02.643Z",
+          "type": "EVIDENCE_GATHERED",
+          "description": "Harvested 14 error logs, recent deploy order-checkout-service-00002-v110, and telemetry metrics.",
+          "metadata": {}
+        },
+        {
+          "timestamp": "2026-10-10T04:35:02.651Z",
+          "type": "DIAGNOSIS_COMPLETE",
+          "description": "Gemini root cause hypothesis generated with 98% confidence. Suspected commit: 4f9a2b8.",
+          "metadata": {}
+        },
+        {
+          "timestamp": "2026-10-10T04:35:11.203Z",
+          "type": "ROLLBACK_APPROVED",
+          "description": "Rollback authorized by Alex Chen (On-Call Lead). Migrating Cloud Run traffic to order-checkout-service-00001-v100.",
+          "metadata": {
+            "approvedBy": "Alex Chen (On-Call Lead)",
+            "targetRevisionId": "order-checkout-service-00001-v100"
+          }
+        },
+        {
+          "timestamp": "2026-10-10T04:35:11.211Z",
+          "type": "INCIDENT_RESOLVED",
+          "description": "Traffic successfully reverted to order-checkout-service-00001-v100. Verification probes passed 10/10. Error rate: 0%.",
+          "metadata": {
+            "incidentId": "INC-894438",
+            "success": true,
+            "targetRevision": "order-checkout-service-00001-v100",
+            "restoredVersion": "1.0.0",
+            "executedAt": "2026-10-10T04:35:11.204Z",
+            "probesPassed": 10,
+            "probesTotal": 10,
+            "postRollbackMetrics": {
+              "totalRequests": 29,
+              "errorCount": 14,
+              "errorRate": 0,
+              "rollingErrorRate": 48.3,
+              "p50LatencyMs": 50,
+              "p95LatencyMs": 3763,
+              "p99LatencyMs": 3818,
+              "activeRevision": {
+                "id": "order-checkout-service-00001-v100",
+                "version": "1.0.0",
+                "image": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+                "deployedAt": "2026-10-10T09:15:00.000Z",
+                "author": "sarah.connor@enterprise.com",
+                "commit": {
+                  "hash": "8a21f4c",
+                  "branch": "main",
+                  "message": "fix: update stripe checkout session timeout handling",
+                  "diff": "--- a/src/checkout.js\n+++ b/src/checkout.js\n@@ -34,3 +34,4 @@\n-  const timeout = 5000;\n+  const timeout = 8000;\n+  session.setTimeout(timeout);"
+                },
+                "status": "HEALTHY",
+                "active": true,
+                "trafficPercent": 100,
+                "notes": "Stable production revision. 0.02% baseline error rate."
+              }
+            }
+          }
+        }
+      ],
+      "updatedAt": "2026-10-10T04:35:11.211Z",
+      "evidence": {
+        "serviceName": "order-checkout-service",
+        "gatheredAt": "2026-10-10T04:35:02.643Z",
+        "collectionDurationMs": 1,
+        "cloudLogging": {
+          "totalLogsEvaluated": 23,
+          "errorCount": 14,
+          "uniqueErrorSignatures": [
+            {
+              "signature": "CRITICAL: Unhandled exception during checkout processing for order ORD-885494: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "count": 1,
+              "sampleTimestamp": "2026-10-10T04:35:02.641Z",
+              "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+              "httpStatus": 500
+            },
+            {
+              "signature": "CRITICAL: Unhandled exception during checkout processing for order ORD-158547: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "count": 1,
+              "sampleTimestamp": "2026-10-10T04:35:02.641Z",
+              "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+              "httpStatus": 500
+            },
+            {
+              "signature": "CRITICAL: Unhandled exception during checkout processing for order ORD-983565: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "count": 1,
+              "sampleTimestamp": "2026-10-10T04:35:02.641Z",
+              "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+              "httpStatus": 500
+            },
+            {
+              "signature": "CRITICAL: Unhandled exception during checkout processing for order ORD-318038: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "count": 1,
+              "sampleTimestamp": "2026-10-10T04:35:02.641Z",
+              "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+              "httpStatus": 500
+            },
+            {
+              "signature": "CRITICAL: Unhandled exception during checkout processing for order ORD-358029: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "count": 1,
+              "sampleTimestamp": "2026-10-10T04:35:02.641Z",
+              "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+              "httpStatus": 500
+            },
+            {
+              "signature": "CRITICAL: Unhandled exception during checkout processing for order ORD-539184: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "count": 1,
+              "sampleTimestamp": "2026-10-10T04:35:02.641Z",
+              "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+              "httpStatus": 500
+            },
+            {
+              "signature": "CRITICAL: Unhandled exception during checkout processing for order ORD-642031: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "count": 1,
+              "sampleTimestamp": "2026-10-10T04:35:00.122Z",
+              "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+              "httpStatus": 500
+            },
+            {
+              "signature": "CRITICAL: Unhandled exception during checkout processing for order ORD-134965: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "count": 1,
+              "sampleTimestamp": "2026-10-10T04:35:00.122Z",
+              "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+              "httpStatus": 500
+            },
+            {
+              "signature": "CRITICAL: Unhandled exception during checkout processing for order ORD-247810: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "count": 1,
+              "sampleTimestamp": "2026-10-10T04:35:00.122Z",
+              "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+              "httpStatus": 500
+            },
+            {
+              "signature": "CRITICAL: Unhandled exception during checkout processing for order ORD-429988: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "count": 1,
+              "sampleTimestamp": "2026-10-10T04:35:00.122Z",
+              "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+              "httpStatus": 500
+            },
+            {
+              "signature": "CRITICAL: Unhandled exception during checkout processing for order ORD-272312: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "count": 1,
+              "sampleTimestamp": "2026-10-10T04:35:00.122Z",
+              "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+              "httpStatus": 500
+            },
+            {
+              "signature": "CRITICAL: Unhandled exception during checkout processing for order ORD-899972: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "count": 1,
+              "sampleTimestamp": "2026-10-10T04:35:00.122Z",
+              "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+              "httpStatus": 500
+            },
+            {
+              "signature": "CRITICAL: Unhandled exception during checkout processing for order ORD-288903: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "count": 1,
+              "sampleTimestamp": "2026-10-10T04:35:00.122Z",
+              "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+              "httpStatus": 500
+            },
+            {
+              "signature": "CRITICAL: Unhandled exception during checkout processing for order ORD-959819: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "count": 1,
+              "sampleTimestamp": "2026-10-10T04:35:00.122Z",
+              "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+              "httpStatus": 500
+            }
+          ],
+          "recentErrorSamples": [
+            {
+              "timestamp": "2026-10-10T04:35:02.641Z",
+              "severity": "ERROR",
+              "message": "CRITICAL: Unhandled exception during checkout processing for order ORD-885494: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "service": "order-checkout-service",
+              "revision": "order-checkout-service-00002-v110",
+              "metadata": {
+                "traceId": "projects/incidentlens-prod-gcp/traces/2bqmju4ehu",
+                "orderId": "ORD-885494",
+                "isGuest": true,
+                "amount": 89,
+                "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+                "httpStatus": 500,
+                "commit": "4f9a2b8"
+              }
+            },
+            {
+              "timestamp": "2026-10-10T04:35:02.641Z",
+              "severity": "ERROR",
+              "message": "CRITICAL: Unhandled exception during checkout processing for order ORD-158547: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "service": "order-checkout-service",
+              "revision": "order-checkout-service-00002-v110",
+              "metadata": {
+                "traceId": "projects/incidentlens-prod-gcp/traces/r8p5jwbi19",
+                "orderId": "ORD-158547",
+                "isGuest": true,
+                "amount": 89,
+                "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+                "httpStatus": 500,
+                "commit": "4f9a2b8"
+              }
+            },
+            {
+              "timestamp": "2026-10-10T04:35:02.641Z",
+              "severity": "ERROR",
+              "message": "CRITICAL: Unhandled exception during checkout processing for order ORD-983565: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "service": "order-checkout-service",
+              "revision": "order-checkout-service-00002-v110",
+              "metadata": {
+                "traceId": "projects/incidentlens-prod-gcp/traces/8b7oxotgxn",
+                "orderId": "ORD-983565",
+                "isGuest": true,
+                "amount": 89,
+                "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+                "httpStatus": 500,
+                "commit": "4f9a2b8"
+              }
+            },
+            {
+              "timestamp": "2026-10-10T04:35:02.641Z",
+              "severity": "ERROR",
+              "message": "CRITICAL: Unhandled exception during checkout processing for order ORD-318038: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "service": "order-checkout-service",
+              "revision": "order-checkout-service-00002-v110",
+              "metadata": {
+                "traceId": "projects/incidentlens-prod-gcp/traces/nl155t9ddw",
+                "orderId": "ORD-318038",
+                "isGuest": true,
+                "amount": 89,
+                "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+                "httpStatus": 500,
+                "commit": "4f9a2b8"
+              }
+            },
+            {
+              "timestamp": "2026-10-10T04:35:02.641Z",
+              "severity": "ERROR",
+              "message": "CRITICAL: Unhandled exception during checkout processing for order ORD-358029: TypeError: Cannot read properties of undefined (reading 'calculateRegional')",
+              "service": "order-checkout-service",
+              "revision": "order-checkout-service-00002-v110",
+              "metadata": {
+                "traceId": "projects/incidentlens-prod-gcp/traces/lovhzeh11s",
+                "orderId": "ORD-358029",
+                "isGuest": true,
+                "amount": 89,
+                "stackTrace": "TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n    at calculateRegionalTax (/workspace/src/taxEngine.js:54:32)\n    at OrderService.processPayment (/workspace/src/checkout.js:112:15)\n    at async /workspace/node_modules/express/lib/router/layer.js:95:5\n    at async next (/workspace/node_modules/express/lib/router/route.js:144:13)",
+                "httpStatus": 500,
+                "commit": "4f9a2b8"
+              }
+            }
+          ]
+        },
+        "cloudDeploy": {
+          "activeRevisionId": "order-checkout-service-00002-v110",
+          "activeVersion": "1.1.0",
+          "activeImage": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.1.0",
+          "deployedAt": "2026-10-10T09:44:12.000Z",
+          "minutesSinceDeploy": 1,
+          "author": "alex.chen@enterprise.com",
+          "commit": {
+            "hash": "4f9a2b8",
+            "branch": "main",
+            "message": "feat(tax): optimize regional tax calculation with new tax engine v2",
+            "diff": "--- a/src/taxEngine.js\n+++ b/src/taxEngine.js\n@@ -52,6 +52,11 @@ function calculateRegionalTax(order, user) {\n+  // BUG: Guest checkouts do not have taxProfile object!\n+  // Throws: TypeError: Cannot read properties of undefined (reading 'calculateRegional')\n+  const rate = user.taxProfile.calculateRegional(order.shippingCountry);\n+  return order.subtotal * rate;\n }\n"
+          },
+          "previousStableRevision": {
+            "id": "order-checkout-service-00001-v100",
+            "version": "1.0.0",
+            "image": "gcr.io/incidentlens-prod-gcp/order-checkout:v1.0.0",
+            "deployedAt": "2026-10-10T09:15:00.000Z",
+            "author": "sarah.connor@enterprise.com"
+          }
+        },
+        "cloudMonitoring": {
+          "errorRatePercent": 100,
+          "p50LatencyMs": 2809,
+          "p95LatencyMs": 3818,
+          "p99LatencyMs": 3818,
+          "totalRequestsInWindow": 19,
+          "metricThresholdCondition": "run.googleapis.com/request_count with response_code_class >= 500 > 5%"
+        },
+        "correlation": {
+          "temporalMatch": true,
+          "summary": "Error spike (100%) appeared immediately following deployment of revision order-checkout-service-00002-v110 (commit 4f9a2b8) by alex.chen@enterprise.com."
+        }
+      },
+      "diagnosis": {
+        "incidentHeadline": "Null pointer dereference in tax calculation introduced in commit 4f9a2b8 by alex.chen@enterprise.com",
+        "severity": "SEV-1",
+        "confidenceScore": 98,
+        "rootCauseHypothesis": "Commit 4f9a2b8 introduced a call to 'user.taxProfile.calculateRegional()' without checking if 'user.taxProfile' exists. For guest checkout requests, user.taxProfile is undefined, throwing an unhandled TypeError that crashes checkout transactions with HTTP 500.",
+        "primarySuspect": {
+          "commitHash": "4f9a2b8",
+          "author": "alex.chen@enterprise.com",
+          "message": "feat(tax): optimize regional tax calculation with new tax engine v2",
+          "bugExplanation": "Guest checkouts lack user.taxProfile, causing TypeError: Cannot read properties of undefined (reading 'calculateRegional') at calculateRegionalTax() in taxEngine.js:54."
+        },
+        "evidenceCorrelation": "Deployment occurred 1m ago. The error rate spiked from baseline (<0.1%) to 100% immediately following traffic shift to order-checkout-service-00002-v110.",
+        "runbookSteps": [
+          "Approve immediate 1-click traffic rollback to previous stable revision order-checkout-service-00001-v100 (v1.0.0).",
+          "Verify Cloud Monitoring error rate drops back to <0.1% within 60 seconds.",
+          "Notify on-call team in Slack channel #incidents-oncall of mitigation status.",
+          "Revert commit 4f9a2b8 on main branch and open high-priority fix ticket for alex.chen@enterprise.com."
+        ],
+        "rollbackPlan": {
+          "recommended": true,
+          "targetRevision": "order-checkout-service-00001-v100",
+          "targetVersion": "1.0.0",
+          "estimatedRecoveryTime": "< 30 seconds",
+          "requiresHumanApproval": true
+        },
+        "aiModel": "gemini-3.8-flash (IncidentLens Engine - Provide GEMINI_API_KEY in settings to run live Google Cloud queries)",
+        "analyzedAt": "2026-10-10T04:35:02.651Z"
+      },
+      "slackMessageId": "SLACK_MSG_1791606902658",
+      "resolutionNotes": "Mitigated in 28s via rollback to order-checkout-service-00001-v100 by Alex Chen (On-Call Lead)",
+      "resolvedAt": "2026-10-10T04:35:11.204Z",
+      "timeToMitigateSeconds": 9
+    }
+  ],
+  "auditLogs": [
+    {
+      "id": "AUDIT-911203",
+      "timestamp": "2026-10-10T04:35:11.203Z",
+      "incidentId": "INC-894438",
+      "approvedBy": "Alex Chen (On-Call Lead)",
+      "action": "EXECUTE_ROLLBACK",
+      "details": {
+        "targetRevision": "order-checkout-service-00001-v100",
+        "reason": "Confirmed tax engine v1.1.0 null pointer bug via Gemini diagnosis.",
+        "approvedAt": "2026-10-10T04:35:11.202Z"
+      }
+    },
+    {
+      "id": "AUDIT-778330",
+      "timestamp": "2026-10-10T04:32:58.330Z",
+      "incidentId": "INC-971968",
+      "approvedBy": "Alex Chen (On-Call Lead)",
+      "action": "EXECUTE_ROLLBACK",
+      "details": {
+        "targetRevision": "order-checkout-service-00001-v100",
+        "reason": "Confirmed tax engine v1.1.0 null pointer bug via Gemini diagnosis.",
+        "approvedAt": "2026-10-10T04:32:58.330Z"
+      }
+    }
+  ],
+  "updatedAt": "2026-10-10T04:35:11.211Z"
+}
